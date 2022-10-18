@@ -82,7 +82,7 @@ class Controller:
                 self.ui.chromatogram.canvas.draw()
 
                 self.ui.mass_spectrum.canvas.ax.clear()
-                with h5py.File('scan_example.h5', 'r') as f:
+                with h5py.File('Files/scan_example.h5', 'r') as f:
                     tof_list = list(f.keys())[0]
 
                     # Creating a list for the files in TOF
@@ -96,7 +96,7 @@ class Controller:
                     self.ui.mass_spectrum.canvas.ax.plot(tof)
                     self.ui.mass_spectrum.canvas.draw()
 
-                with h5py.File('example.h5', 'r') as f:
+                with h5py.File('Files/example.h5', 'r') as f:
                     picture_nr = round(abs(ix) / max(v.test_file_x) * 9)
                     electron_list = list(f.keys())[0]
                     electron_images = f[electron_list][()]

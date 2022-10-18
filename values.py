@@ -9,7 +9,7 @@ check2 = True
 i1 = 0
 i2 = 0
 first_open = True
-test_file = 'test_file.txt'
+test_file = 'Files/test_file.txt'
 test_file_x = np.loadtxt(test_file, skiprows=3, usecols=0)
 test_file_y = np.loadtxt(test_file, skiprows=3, usecols=1)
 length = len(test_file_x)

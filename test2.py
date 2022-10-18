@@ -2,7 +2,7 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename1 = "example.h5"
+filename1 = "Files/example.h5"
 
 with h5py.File(filename1, "r") as f:
     # get first object name/key; may or may NOT be a group
@@ -23,7 +23,7 @@ with h5py.File(filename1, "r") as f:
         plt.imshow(electron_images[i])
     plt.show()
 
-filename2 = "scan_example.h5"
+filename2 = "Files/scan_example.h5"
 
 with h5py.File(filename2, "r") as f:
     # get first object name/key; may or may NOT be a group
