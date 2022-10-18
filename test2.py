@@ -33,13 +33,16 @@ with h5py.File(filename2, "r") as f:
     ds_arr = f[a_group_key]['data_point_000001']  # returns as a numpy array
     print(len(f[a_group_key]))
 
+    x = []
     for _ in f[a_group_key]:
-        if _ == 'scan_data':
-            # break
-            plt.plot(f[a_group_key][_])
-            plt.show()
+        x.append(_)
+        # if _ == 'scan_data':
+        #     break
+        #     # plt.plot(f[a_group_key][_])
+        #     # plt.show()
         # else:
         #     ds_arr = f[a_group_key][_]
         #     test = np.squeeze(ds_arr['TOF0'])
         #     plt.plot(test)
-    plt.show()
+    # plt.show()
+    print(x)
