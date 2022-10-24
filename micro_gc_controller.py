@@ -15,11 +15,13 @@ class micro_GC_controller:
         self.ui_GC.temperature_trajectory.canvas.fig.text(0.02, 0.5, 'Temperature (°C)', ha='center', va='center', rotation='vertical')
         self.ui_GC.temperature_trajectory.canvas.ax.grid()
 
-        def open_file_browser():
-            self.fileBrowserWidget = FileBrowserController()
+        def save_file_browser():
+            self.fileBrowserWidget = FileBrowserController(save=True, microGC=True)
             self.fileBrowserWidget.show()
-            # # The command below will enable the entire directory in the open_file_browser menu
-            # self.fileBrowserWidget.set_path()
+
+        def open_file_browser():
+            self.fileBrowserWidget = FileBrowserController(open_file=True, microGC=True)
+            self.fileBrowserWidget.show()
 
         def update_graph():
             try:
@@ -65,5 +67,7 @@ class micro_GC_controller:
         self.ui_GC.remove_row.clicked.connect(remove_row)
 
         # Drop down menu and their functions
+        self.ui_GC.action_Save_as.triggered.connect(save_file_browser)
         self.ui_GC.action_Open.triggered.connect(open_file_browser)
-        self.ui_GC.action_Save_as.triggered.connect(open_file_browser)
+
+

@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_high_voltage_control(object):
     def setupUi(self, high_voltage_control):
         high_voltage_control.setObjectName("high_voltage_control")
-        high_voltage_control.resize(879, 791)
+        high_voltage_control.resize(875, 782)
         self.centralwidget = QtWidgets.QWidget(high_voltage_control)
         self.centralwidget.setObjectName("centralwidget")
         self.ip_adress_frame = QtWidgets.QFrame(self.centralwidget)
@@ -629,7 +629,7 @@ class Ui_high_voltage_control(object):
         self.exit_button.setFont(font)
         self.exit_button.setObjectName("exit_button")
         self.layoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.layoutWidget.setGeometry(QtCore.QRect(740, 60, 97, 24))
+        self.layoutWidget.setGeometry(QtCore.QRect(740, 60, 109, 28))
         self.layoutWidget.setObjectName("layoutWidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.layoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -646,7 +646,7 @@ class Ui_high_voltage_control(object):
         self.horizontalLayout.addWidget(self.hv_radiobutton)
         high_voltage_control.setCentralWidget(self.centralwidget)
         self.menuBar = QtWidgets.QMenuBar(high_voltage_control)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 879, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 875, 26))
         self.menuBar.setObjectName("menuBar")
         self.menu_save = QtWidgets.QMenu(self.menuBar)
         self.menu_save.setObjectName("menu_save")
@@ -658,7 +658,6 @@ class Ui_high_voltage_control(object):
         self.actionSave_as = QtWidgets.QAction(high_voltage_control)
         self.actionSave_as.setObjectName("actionSave_as")
         self.menu_save.addAction(self.actionSave)
-        self.menu_save.addAction(self.actionSave_as)
         self.menu_save.addAction(self.actionOpen)
         self.menuBar.addAction(self.menu_save.menuAction())
 

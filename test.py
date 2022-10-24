@@ -32,6 +32,7 @@ class Test(QtWidgets.QMainWindow):
         self.filemodel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.Files)
         self.file_view = QtWidgets.QListView(parent=self)
         self.file_view.setModel(self.filemodel)
+        self.file_view.clicked[QtCore.QModelIndex].connect(self.file)
 
         splitter_filebrowser = QtWidgets.QSplitter()
         splitter_filebrowser.addWidget(self.folder_view)
@@ -49,9 +50,13 @@ class Test(QtWidgets.QMainWindow):
         # get selected path of folder_view
         index = self.selectionModel.currentIndex()
         dir_path = self.dirmodel.filePath(index)
-        print(index)
+        print(self.filemodel.fileName(index))
         self.filemodel.setRootPath(dir_path)
         self.file_view.setRootIndex(self.filemodel.index(dir_path))
+
+    def file(self):
+        index = self.file_view.currentIndex()
+        print(self.filemodel.fileName(index))
 
 
 if __name__ == '__main__':

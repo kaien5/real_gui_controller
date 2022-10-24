@@ -1,9 +1,6 @@
 # Initializing lists with their starting values
 import numpy as np
 
-y1 = np.array([15])
-x1 = np.array([0])
-row_x1 = 0
 check1 = True
 check2 = True
 i1 = 0
@@ -12,7 +9,6 @@ first_open = True
 test_file = 'Files/test_file.txt'
 test_file_x = np.loadtxt(test_file, skiprows=3, usecols=0)
 test_file_y = np.loadtxt(test_file, skiprows=3, usecols=1)
-length = len(test_file_x)
 
 standard_hvc_settings = {"ip address": "192.10.10.105", "connection name 1": "Nozzle", "connection name 2": "V2",
                          "connection name 3": "V1",
