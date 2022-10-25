@@ -16,7 +16,7 @@ class micro_GC_controller:
         self.ui_GC.temperature_trajectory.canvas.ax.grid()
 
         def save_file_browser():
-            self.fileBrowserWidget = FileBrowserController(save=True, microGC=True)
+            self.fileBrowserWidget = FileBrowserController(save_file=True, microGC=True)
             self.fileBrowserWidget.show()
 
         def open_file_browser():
@@ -67,7 +67,7 @@ class micro_GC_controller:
         self.ui_GC.remove_row.clicked.connect(remove_row)
 
         # Drop down menu and their functions
-        self.ui_GC.action_Save_as.triggered.connect(save_file_browser)
+        self.ui_GC.action_Save.triggered.connect(save_file_browser)
         self.ui_GC.action_Open.triggered.connect(open_file_browser)
 
 
