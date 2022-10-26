@@ -1,9 +1,9 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem
-
-import file_browser
-import values
 from microGC_settings import Ui_microGC_settings
+
+import values
+import file_browser
 
 
 class MicroGcController:
@@ -40,6 +40,16 @@ class MicroGcController:
             self.ui_GC.backflush_time.setText(microGC_settings["Back-flush time"])
             self.ui_GC.cycle_time.setText(microGC_settings["Cycle time"])
             self.ui_GC.number_of_analysis.setText(microGC_settings["# of analysis per sequence"])
+
+            # Equalizing the table row count to size of "Rate"
+            while self.ui_GC.temperature_table.rowCount() < len(microGC_settings["Rate"]):
+                self.ui_GC.temperature_table.insertRow(self.ui_GC.temperature_table.rowCount())
+
+            # Equalizing the table row count to size of "Rate"
+            while self.ui_GC.temperature_table.rowCount() > len(microGC_settings["Rate"]):
+                self.ui_GC.temperature_table.removeRow(self.ui_GC.temperature_table.rowCount() - 1)
+
+            # Filling in the table
             for i in range(len(microGC_settings["Rate"])):
                 self.ui_GC.temperature_table.setItem(i, 0, QTableWidgetItem(microGC_settings["Rate"][i]))
                 self.ui_GC.temperature_table.setItem(i, 1, QTableWidgetItem(microGC_settings["Final temp"][i]))
@@ -57,26 +67,27 @@ class MicroGcController:
                 rate.append(self.ui_GC.temperature_table.item(i, 0).text())
                 final_temp.append(self.ui_GC.temperature_table.item(i, 1).text())
                 hold_time.append((self.ui_GC.temperature_table.item(i, 2).text()))
+
+            # The microGC settings
+            microGC_settings = values.standard_microGC_settings
+            microGC_settings["Column temperature"] = self.ui_GC.column_oven_temp.text()
+            microGC_settings["Column carrier pressure"] = self.ui_GC.column_pressure.text()
+            microGC_settings["Injection temperature"] = self.ui_GC.injection_temp.text()
+            microGC_settings["Method name"] = self.ui_GC.method_name.text()
+            microGC_settings["Heated sample line temp"] = self.ui_GC.heated_sample_line_temp.text()
+            microGC_settings["Injection time"] = self.ui_GC.injection_time.text()
+            microGC_settings["Analysis time"] = self.ui_GC.analysis_time.text()
+            microGC_settings["Back-flush time"] = self.ui_GC.backflush_time.text()
+            microGC_settings["Cycle time"] = self.ui_GC.cycle_time.text()
+            microGC_settings["# of analysis per sequence"] = self.ui_GC.number_of_analysis.text()
+            microGC_settings["Rate"] = rate
+            microGC_settings["Final temp"] = final_temp
+            microGC_settings["Hold time"] = hold_time
+            self.fileBrowserWidget = file_browser.FileBrowserController(save_file=True, microGC=True, microGC_data=microGC_settings)
+            self.fileBrowserWidget.show()
+
         except Exception as e:
             print(f'All fields must contain data. Error: {e}')
-
-        # The microGC settings
-        microGC_settings = values.standard_microGC_settings
-        microGC_settings["Column temperature"] = self.ui_GC.column_oven_temp.text()
-        microGC_settings["Column carrier pressure"] = self.ui_GC.column_pressure.text()
-        microGC_settings["Injection temperature"] = self.ui_GC.injection_temp.text()
-        microGC_settings["Method name"] = self.ui_GC.method_name.text()
-        microGC_settings["Heated sample line temp"] = self.ui_GC.heated_sample_line_temp.text()
-        microGC_settings["Injection time"] = self.ui_GC.injection_time.text()
-        microGC_settings["Analysis time"] = self.ui_GC.analysis_time.text()
-        microGC_settings["Back-flush time"] = self.ui_GC.backflush_time.text()
-        microGC_settings["Cycle time"] = self.ui_GC.cycle_time.text()
-        microGC_settings["# of analysis per sequence"] = self.ui_GC.number_of_analysis.text()
-        microGC_settings["Rate"] = rate
-        microGC_settings["Final temp"] = final_temp
-        microGC_settings["Hold time"] = hold_time
-        self.fileBrowserWidget = file_browser.FileBrowserController(save_file=True, microGC=True, microGC_data=microGC_settings)
-        self.fileBrowserWidget.show()
 
     def open_file_browser(self):
         self.window_GC.close()

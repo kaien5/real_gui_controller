@@ -1,12 +1,11 @@
-from sys import argv, exit
-# from time import time, sleep
-
 import h5py
 import numpy as np
+import values as v
+
+# from time import time, sleep
+from sys import argv, exit
 from PyQt5 import QtWidgets
 # from PyQt5.QtCore import QObject, pyqtSignal
-
-import values as v
 from chiralMS_controller import ChiralMsController
 from injector_controller import Injector_controller
 from microGC_controller import MicroGcController

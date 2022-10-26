@@ -1,10 +1,10 @@
 import json
 import hvc_controller
+import microGC_controller
 
 from os import getcwd
 from PyQt5 import QtCore, QtWidgets
 
-import microGC_controller
 
 
 class FileBrowserController(QtWidgets.QMainWindow):
@@ -109,7 +109,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
         save_filename = self.file_line.text()
         with open(getcwd() + '/Chiral MS settings/High Voltage Control/' + save_filename + '.json', 'w') as f:
             json.dump(self.hvc_data, f)
-        print(f'{save_filename} is saved at {getcwd()}/Chiral MS settings/High Voltage Control')
+        print(f'{save_filename} is saved at {str(getcwd())}/Chiral MS settings/High Voltage Control')
         self.close()
 
     def open_hvc(self):  # This function will open the hvc settings of a json file
@@ -127,7 +127,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
         save_filename = self.file_line.text()
         with open(getcwd() + '/Chiral MS settings/MicroGC/' + save_filename + '.json', 'w') as f:
             json.dump(self.microGC_data, f)
-        print(f'{save_filename} is saved at {getcwd}/Chiral Ms settings/MicroGC')
+        print(f'{save_filename} is saved at {str(getcwd())}/Chiral MS settings/MicroGC')
         self.close()
 
     def open_microGC(self):
