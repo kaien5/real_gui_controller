@@ -1,5 +1,5 @@
 import json
-import open_hvc_controller
+import hvc_controller
 
 from os import getcwd
 from PyQt5 import QtCore, QtWidgets
@@ -105,7 +105,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
         try:
             with open(getcwd() + '/Chiral MS settings/High Voltage Control/' + open_filename + '.json', 'r') as f:
                 hvc_settings = json.load(f)
-                self.window_hvc = open_hvc_controller.OpenHvcController(file=True, data=hvc_settings)
+                self.window_hvc = hvc_controller.OpenHvcController(file=True, data=hvc_settings)
                 print(f'File {open_filename} is opened')
         except:
             print('File not found')
