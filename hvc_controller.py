@@ -5,11 +5,16 @@ from high_voltage_control import Ui_high_voltage_control
 
 
 class HvcController:
-    def __init__(self, file=False, data=None) -> object:
+    def __init__(self, file=False, data=None):
+        self.fileBrowserWidget = None
         self.window_hvc = QtWidgets.QMainWindow()
         self.ui_hvc = Ui_high_voltage_control()
         self.ui_hvc.setupUi(self.window_hvc)
         self.window_hvc.show()
+
+        # The drop-down menu and their functions
+        self.ui_hvc.actionOpen.triggered.connect(self.open_file)
+        self.ui_hvc.actionSave.triggered.connect(self.save_file)
 
         if file:
             hvc_settings = data
@@ -50,9 +55,6 @@ class HvcController:
             self.ui_hvc.new_setting_delta_spinbox_4.setValue(hvc_settings["delta V/s 4"])
             self.ui_hvc.new_setting_delta_spinbox_5.setValue(hvc_settings["delta V/s 5"])
             self.ui_hvc.new_setting_delta_spinbox_6.setValue(hvc_settings["delta V/s 6"])
-
-        self.ui_hvc.actionOpen.triggered.connect(self.open_file)
-        self.ui_hvc.actionSave.triggered.connect(self.save_file)
 
     def open_file(self):
         self.window_hvc.close()

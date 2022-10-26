@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1902, 1002)
+        MainWindow.resize(1920, 1015)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.settings_mainWindow_frame = QtWidgets.QFrame(self.centralwidget)
@@ -88,13 +88,13 @@ class Ui_MainWindow(object):
         self.stop_button.setFont(font)
         self.stop_button.setObjectName("stop_button")
         self.chromatogram = MplWidget(self.centralwidget)
-        self.chromatogram.setGeometry(QtCore.QRect(300, 30, 1591, 301))
+        self.chromatogram.setGeometry(QtCore.QRect(300, 30, 1591, 381))
         self.chromatogram.setObjectName("chromatogram")
         self.mass_spectrum = MplWidget(self.centralwidget)
-        self.mass_spectrum.setGeometry(QtCore.QRect(300, 360, 1591, 301))
+        self.mass_spectrum.setGeometry(QtCore.QRect(300, 410, 801, 581))
         self.mass_spectrum.setObjectName("mass_spectrum")
         self.electron_image = MplWidget(self.centralwidget)
-        self.electron_image.setGeometry(QtCore.QRect(300, 690, 1591, 301))
+        self.electron_image.setGeometry(QtCore.QRect(1100, 410, 791, 581))
         self.electron_image.setObjectName("electron_image")
         MainWindow.setCentralWidget(self.centralwidget)
 

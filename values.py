@@ -28,3 +28,8 @@ standard_hvc_settings = {"ip address": "192.10.10.105", "connection name 1": "No
                          "delta V/s 3": 100,
                          "delta V/s 4": 50,
                          "delta V/s 5": 50, "delta V/s 6": 25}
+
+standard_microGC_settings = {"Column temperature": "75.0", "Column carrier pressure": "1023.4", "Injection temperature": "250.0",
+                             "Method name": "Test", "Heated sample line temp": "0", "Injection time": "0", "Analysis time": "0",
+                             "Back-flush time": "0", "Cycle time": "0", "# of analysis per sequence": "0", "Rate": "", "Final temp": "",
+                             "Hold time": ""}

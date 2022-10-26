@@ -234,7 +234,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Backflush time:</string>
+      <string>Back-flush time:</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_7">
@@ -685,7 +685,7 @@
     </column>
     <item row="0" column="0">
      <property name="text">
-      <string>-</string>
+      <string>0</string>
      </property>
     </item>
     <item row="0" column="1">

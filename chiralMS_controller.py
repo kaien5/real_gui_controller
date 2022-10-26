@@ -5,7 +5,7 @@ from hvc_controller import HvcController
 
 
 class ChiralMsController:
-    def __init__(self) -> object:
+    def __init__(self):
         self.window_MS = QtWidgets.QMainWindow()
         self.ui_MS = Ui_chiralMS_settings()
         self.ui_MS.setupUi(self.window_MS)

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1902</width>
-    <height>1002</height>
+    <width>1920</width>
+    <height>1015</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -227,7 +227,7 @@
       <x>300</x>
       <y>30</y>
       <width>1591</width>
-      <height>301</height>
+      <height>381</height>
      </rect>
     </property>
    </widget>
@@ -235,19 +235,19 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>360</y>
-      <width>1591</width>
-      <height>301</height>
+      <y>410</y>
+      <width>801</width>
+      <height>581</height>
      </rect>
     </property>
    </widget>
    <widget class="MplWidget" name="electron_image">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>690</y>
-      <width>1591</width>
-      <height>301</height>
+      <x>1100</x>
+      <y>410</y>
+      <width>791</width>
+      <height>581</height>
      </rect>
     </property>
    </widget>
