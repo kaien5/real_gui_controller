@@ -27,7 +27,8 @@ class Controller:
         self.MainWindow.showMaximized()
 
         # Disabling the plots
-        self.ui.chromatogram.setEnabled(False)
+        self.ui.chromatogram1.setEnabled(False)
+        self.ui.chromatogram2.setEnabled(False)
         self.ui.mass_spectrum.setEnabled(False)
         self.ui.electron_image.setEnabled(False)
 
@@ -40,10 +41,18 @@ class Controller:
         self.ui.start_button.clicked.connect(self.start)
         self.ui.stop_button.clicked.connect(self.stop)
 
-        # The chromatogram settings
-        self.ui.chromatogram.canvas.mpl_connect('button_press_event', self.on_click)
-        self.ui.chromatogram.canvas.fig.text(0.85, 0.15, 'Retention time (min)', ha='center', va='center')
-        self.ui.chromatogram.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
+        self.ui.electron_image.canvas.fig.axes.clear()
+        # The chromatogram and mass spectrum settings
+        self.ui.chromatogram1.canvas.fig.suptitle('Ch1 (FF)')
+        self.ui.chromatogram2.canvas.fig.suptitle('Ch2 (FF)')
+        self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
+        self.ui.electron_image.canvas.fig.suptitle('Electron image')
+        self.ui.chromatogram1.canvas.mpl_connect('button_press_event', self.on_click)
+        self.ui.chromatogram2.canvas.mpl_connect('button_press_event', self.on_click)
+        self.ui.chromatogram1.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
+        self.ui.chromatogram1.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
+        self.ui.chromatogram2.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
+        self.ui.chromatogram2.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
         self.ui.mass_spectrum.canvas.fig.text(0.85, 0.05, 'Index nr.', ha='center', va='center')
         self.ui.mass_spectrum.canvas.fig.text(0.05, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
 
@@ -52,26 +61,33 @@ class Controller:
 
     # Start the data acquisition
     def start(self):
-        # Disabling and enabling the stop and start buttons
+        # Disabling and enabling the buttons and plots
         self.ui.start_button.setEnabled(False)
         self.ui.stop_button.setEnabled(True)
-        self.ui.chromatogram.setEnabled(True)
+        self.ui.chromatogram1.setEnabled(True)
+        self.ui.chromatogram2.setEnabled(True)
         self.ui.mass_spectrum.setEnabled(True)
         self.ui.electron_image.setEnabled(True)
 
-        # Plotting the chromatogram
-        self.ui.chromatogram.canvas.ax.clear()
-        self.ui.chromatogram.canvas.ax.plot(v.test_file_x, v.test_file_y)
-        self.ui.chromatogram.canvas.draw()
+        # Plotting the chromatograms
+        self.ui.chromatogram1.canvas.ax.clear()
+        self.ui.chromatogram2.canvas.ax.clear()
+        self.ui.chromatogram1.canvas.ax.plot(v.test_file_time, v.test_file_Ch1_FF_intensity)
+        self.ui.chromatogram2.canvas.ax.plot(v.test_file_time, v.test_file_Ch2_FF_intensity)
+        self.ui.chromatogram1.canvas.draw()
+        self.ui.chromatogram2.canvas.draw()
 
     # Stop the data acquisition
     def stop(self):
         # Enabling, disabling and clearing plots
         self.ui.start_button.setEnabled(True)
         self.ui.stop_button.setEnabled(False)
-        self.ui.chromatogram.canvas.ax.clear()
-        self.ui.chromatogram.canvas.draw()
-        self.ui.chromatogram.setEnabled(False)
+        self.ui.chromatogram1.canvas.ax.clear()
+        self.ui.chromatogram1.canvas.draw()
+        self.ui.chromatogram1.setEnabled(False)
+        self.ui.chromatogram2.canvas.ax.clear()
+        self.ui.chromatogram2.canvas.draw()
+        self.ui.chromatogram2.setEnabled(False)
         self.ui.mass_spectrum.canvas.ax.clear()
         self.ui.mass_spectrum.canvas.draw()
         self.ui.mass_spectrum.setEnabled(False)
@@ -83,13 +99,17 @@ class Controller:
     def on_click(self, event):
         if event.dblclick:
             try:
-                ix = round(float(event.xdata))  # Location of the plot click
-                index = np.where(v.test_file_x == ix)[0][0]  # Index location on where the line_x should appear
-                line_x = v.test_file_x[index]
-                self.ui.chromatogram.canvas.ax.clear()
-                self.ui.chromatogram.canvas.ax.plot(v.test_file_x, v.test_file_y)
-                self.ui.chromatogram.canvas.ax.plot([line_x, line_x], [min(v.test_file_y), max(v.test_file_y)])
-                self.ui.chromatogram.canvas.draw()
+                ix = round(float(event.xdata), 2)  # Location of the plot click
+                index = np.where(v.test_file_time == ix)[0][0]  # Index location on where the line_x should appear
+                line_x = v.test_file_time[index]
+                self.ui.chromatogram1.canvas.ax.clear()
+                self.ui.chromatogram2.canvas.ax.clear()
+                self.ui.chromatogram1.canvas.ax.plot(v.test_file_time, v.test_file_Ch1_FF_intensity)
+                self.ui.chromatogram2.canvas.ax.plot(v.test_file_time, v.test_file_Ch2_FF_intensity)
+                self.ui.chromatogram1.canvas.ax.plot([line_x, line_x], [min(v.test_file_Ch1_FF_intensity), max(v.test_file_Ch1_FF_intensity)])
+                self.ui.chromatogram2.canvas.ax.plot([line_x, line_x], [min(v.test_file_Ch2_FF_intensity), max(v.test_file_Ch2_FF_intensity)])
+                self.ui.chromatogram1.canvas.draw()
+                self.ui.chromatogram2.canvas.draw()
                 self.ui.mass_spectrum.canvas.ax.clear()
 
                 # Selecting the TOF file based on which location of the plot has been clicked
@@ -101,14 +121,14 @@ class Controller:
                     for _ in f[tof_list]:
                         x.append(_)
 
-                    tof_nr = f[tof_list][x[abs(ix)]]
+                    tof_nr = f[tof_list][x[abs(round(ix))]]
                     tof = np.squeeze(tof_nr['TOF0'])
                     self.ui.mass_spectrum.canvas.ax.plot(tof)
                     self.ui.mass_spectrum.canvas.draw()
 
                 # Selecting the electron image based on which location of the plot has been clicked
                 with h5py.File('Files/example.h5', 'r') as f:
-                    picture_nr = round(abs(ix) / max(v.test_file_x) * 9)
+                    picture_nr = round(abs(round(ix)) / max(v.test_file_time) * 9)
                     electron_list = list(f.keys())[0]
                     electron_images = f[electron_list][()]
                     self.ui.electron_image.canvas.ax.imshow(electron_images[picture_nr])

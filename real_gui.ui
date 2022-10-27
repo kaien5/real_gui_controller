@@ -221,22 +221,12 @@
      </property>
     </widget>
    </widget>
-   <widget class="MplWidget" name="chromatogram">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>30</y>
-      <width>1591</width>
-      <height>381</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="MplWidget" name="mass_spectrum">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>290</x>
       <y>410</y>
-      <width>801</width>
+      <width>811</width>
       <height>581</height>
      </rect>
     </property>
@@ -246,10 +236,53 @@
      <rect>
       <x>1100</x>
       <y>410</y>
-      <width>791</width>
+      <width>801</width>
       <height>581</height>
      </rect>
     </property>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>10</y>
+      <width>1591</width>
+      <height>401</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Ch1 (FF)</string>
+     </attribute>
+     <widget class="MplWidget" name="chromatogram1">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1591</width>
+        <height>381</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Ch2 (FF)</string>
+     </attribute>
+     <widget class="MplWidget" name="chromatogram2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1591</width>
+        <height>381</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
  </widget>
