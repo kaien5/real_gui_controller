@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem
 from microGC_settings import Ui_microGC_settings
 
-import values
+import values as v
 import file_browser
 
 
@@ -28,33 +28,38 @@ class MicroGcController:
         self.ui_GC.action_Save.triggered.connect(self.save_file_browser)
         self.ui_GC.action_Open.triggered.connect(self.open_file_browser)
 
+        # Checking if settings are supplied, else use the standard settings
         if file:
             microGC_settings = data
-            self.ui_GC.column_oven_temp.setText(microGC_settings["Column temperature"])
-            self.ui_GC.column_pressure.setText(microGC_settings["Column carrier pressure"])
-            self.ui_GC.injection_temp.setText(microGC_settings["Injection temperature"])
-            self.ui_GC.method_name.setText(microGC_settings["Method name"])
-            self.ui_GC.heated_sample_line_temp.setText(microGC_settings["Heated sample line temp"])
-            self.ui_GC.injection_time.setText(microGC_settings["Injection time"])
-            self.ui_GC.analysis_time.setText(microGC_settings["Analysis time"])
-            self.ui_GC.backflush_time.setText(microGC_settings["Back-flush time"])
-            self.ui_GC.cycle_time.setText(microGC_settings["Cycle time"])
-            self.ui_GC.number_of_analysis.setText(microGC_settings["# of analysis per sequence"])
+        else:
+            microGC_settings = v.standard_microGC_settings
 
-            # Equalizing the table row count to size of "Rate"
-            while self.ui_GC.temperature_table.rowCount() < len(microGC_settings["Rate"]):
-                self.ui_GC.temperature_table.insertRow(self.ui_GC.temperature_table.rowCount())
+        self.ui_GC.column_oven_temp.setText(microGC_settings["Column temperature"])
+        self.ui_GC.column_pressure.setText(microGC_settings["Column carrier pressure"])
+        self.ui_GC.injection_temp.setText(microGC_settings["Injection temperature"])
+        self.ui_GC.method_name.setText(microGC_settings["Method name"])
+        self.ui_GC.heated_sample_line_temp.setText(microGC_settings["Heated sample line temp"])
+        self.ui_GC.injection_time.setText(microGC_settings["Injection time"])
+        self.ui_GC.analysis_time.setText(microGC_settings["Analysis time"])
+        self.ui_GC.backflush_time.setText(microGC_settings["Back-flush time"])
+        self.ui_GC.cycle_time.setText(microGC_settings["Cycle time"])
+        self.ui_GC.number_of_analysis.setText(microGC_settings["# of analysis per sequence"])
 
-            # Equalizing the table row count to size of "Rate"
-            while self.ui_GC.temperature_table.rowCount() > len(microGC_settings["Rate"]):
-                self.ui_GC.temperature_table.removeRow(self.ui_GC.temperature_table.rowCount() - 1)
+        # Equalizing the table row count to size of "Rate"
+        while self.ui_GC.temperature_table.rowCount() < len(microGC_settings["Rate"]):
+            self.ui_GC.temperature_table.insertRow(self.ui_GC.temperature_table.rowCount())
 
-            # Filling in the table
-            for i in range(len(microGC_settings["Rate"])):
-                self.ui_GC.temperature_table.setItem(i, 0, QTableWidgetItem(microGC_settings["Rate"][i]))
-                self.ui_GC.temperature_table.setItem(i, 1, QTableWidgetItem(microGC_settings["Final temp"][i]))
-                self.ui_GC.temperature_table.setItem(i, 2, QTableWidgetItem(microGC_settings["Hold time"][i]))
+        # Equalizing the table row count to size of "Rate"
+        while self.ui_GC.temperature_table.rowCount() > len(microGC_settings["Rate"]):
+            self.ui_GC.temperature_table.removeRow(self.ui_GC.temperature_table.rowCount() - 1)
 
+        # Filling in the table
+        for i in range(len(microGC_settings["Rate"])):
+            self.ui_GC.temperature_table.setItem(i, 0, QTableWidgetItem(microGC_settings["Rate"][i]))
+            self.ui_GC.temperature_table.setItem(i, 1, QTableWidgetItem(microGC_settings["Final temp"][i]))
+            self.ui_GC.temperature_table.setItem(i, 2, QTableWidgetItem(microGC_settings["Hold time"][i]))
+
+    # Opening the save file browser and supplying the settings
     def save_file_browser(self):
         # Empty lists for the columns in the table
         rate = []
@@ -69,7 +74,7 @@ class MicroGcController:
                 hold_time.append((self.ui_GC.temperature_table.item(i, 2).text()))
 
             # The microGC settings
-            microGC_settings = values.standard_microGC_settings
+            microGC_settings = v.standard_microGC_settings
             microGC_settings["Column temperature"] = self.ui_GC.column_oven_temp.text()
             microGC_settings["Column carrier pressure"] = self.ui_GC.column_pressure.text()
             microGC_settings["Injection temperature"] = self.ui_GC.injection_temp.text()
@@ -83,17 +88,23 @@ class MicroGcController:
             microGC_settings["Rate"] = rate
             microGC_settings["Final temp"] = final_temp
             microGC_settings["Hold time"] = hold_time
+
+            # Opening the filebrowser with the settings supplied
             self.fileBrowserWidget = file_browser.FileBrowserController(save_file=True, microGC=True, microGC_data=microGC_settings)
             self.fileBrowserWidget.show()
+            self.fileBrowserWidget.set_path()
 
         except Exception as e:
             print(f'All fields must contain data. Error: {e}')
 
+    # Opening the file browser
     def open_file_browser(self):
         self.window_GC.close()
         self.fileBrowserWidget = file_browser.FileBrowserController(open_file=True, microGC=True)
         self.fileBrowserWidget.show()
+        self.fileBrowserWidget.set_path()
 
+    # Updating the graph
     def update_graph(self):
         try:
             # Clear the previous data
@@ -126,8 +137,10 @@ class MicroGcController:
         except Exception as e:
             print(f'All fields must contain data. Error: {e}')
 
+    # Adds a row in the table
     def add_row(self):
         self.ui_GC.temperature_table.insertRow(self.ui_GC.temperature_table.rowCount())
 
+    # Removes a row in the table
     def remove_row(self):
         self.ui_GC.temperature_table.removeRow(self.ui_GC.temperature_table.rowCount() - 1)

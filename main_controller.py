@@ -66,6 +66,7 @@ class Controller:
 
     # Stop the data acquisition
     def stop(self):
+        # Enabling, disabling and clearing plots
         self.ui.start_button.setEnabled(True)
         self.ui.stop_button.setEnabled(False)
         self.ui.chromatogram.canvas.ax.clear()
@@ -89,8 +90,9 @@ class Controller:
                 self.ui.chromatogram.canvas.ax.plot(v.test_file_x, v.test_file_y)
                 self.ui.chromatogram.canvas.ax.plot([line_x, line_x], [min(v.test_file_y), max(v.test_file_y)])
                 self.ui.chromatogram.canvas.draw()
-
                 self.ui.mass_spectrum.canvas.ax.clear()
+
+                # Selecting the TOF file based on which location of the plot has been clicked
                 with h5py.File('Files/scan_example.h5', 'r') as f:
                     tof_list = list(f.keys())[0]
 
@@ -99,18 +101,19 @@ class Controller:
                     for _ in f[tof_list]:
                         x.append(_)
 
-                    # Selecting the TOF file based on what location of the plot has been clicked
                     tof_nr = f[tof_list][x[abs(ix)]]
                     tof = np.squeeze(tof_nr['TOF0'])
                     self.ui.mass_spectrum.canvas.ax.plot(tof)
                     self.ui.mass_spectrum.canvas.draw()
 
+                # Selecting the electron image based on which location of the plot has been clicked
                 with h5py.File('Files/example.h5', 'r') as f:
                     picture_nr = round(abs(ix) / max(v.test_file_x) * 9)
                     electron_list = list(f.keys())[0]
                     electron_images = f[electron_list][()]
                     self.ui.electron_image.canvas.ax.imshow(electron_images[picture_nr])
                     self.ui.electron_image.canvas.draw()
+
             except Exception as e:
                 print(f'Click inside the boundaries because the {e}')
 

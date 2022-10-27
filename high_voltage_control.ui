@@ -38,9 +38,6 @@
        <height>20</height>
       </rect>
      </property>
-     <property name="text">
-      <string>192.</string>
-     </property>
     </widget>
    </widget>
    <widget class="QFrame" name="connections_frame">
@@ -100,9 +97,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Nozzle</string>
-      </property>
      </widget>
     </widget>
     <widget class="QFrame" name="connections_frame_2">
@@ -146,9 +140,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>V2</string>
       </property>
      </widget>
     </widget>
@@ -194,9 +185,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>V1</string>
-      </property>
      </widget>
     </widget>
     <widget class="QFrame" name="connections_frame_4">
@@ -240,9 +228,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>Anode</string>
       </property>
      </widget>
     </widget>
@@ -288,9 +273,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>V3</string>
-      </property>
      </widget>
     </widget>
     <widget class="QFrame" name="connections_frame_6">
@@ -334,9 +316,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>MCP</string>
       </property>
      </widget>
     </widget>
@@ -416,9 +395,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>HV06</string>
-      </property>
      </widget>
      <widget class="QLabel" name="model_information_name_label_1">
       <property name="geometry">
@@ -465,9 +441,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>250</string>
-      </property>
      </widget>
      <widget class="QLineEdit" name="model_information_max_line_1">
       <property name="geometry">
@@ -477,9 +450,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>5000</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_max_label_1">
@@ -508,9 +478,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_setpoint_label_1">
@@ -584,9 +551,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>HV05</string>
-      </property>
      </widget>
      <widget class="QLabel" name="model_information_name_label_2">
       <property name="geometry">
@@ -633,9 +597,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>250</string>
-      </property>
      </widget>
      <widget class="QLineEdit" name="model_information_max_line_2">
       <property name="geometry">
@@ -645,9 +606,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>5000</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_max_label_2">
@@ -676,9 +634,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_setpoint_label_2">
@@ -752,9 +707,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>HV04</string>
-      </property>
      </widget>
      <widget class="QLabel" name="model_information_name_label_3">
       <property name="geometry">
@@ -801,9 +753,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>250</string>
-      </property>
      </widget>
      <widget class="QLineEdit" name="model_information_max_line_3">
       <property name="geometry">
@@ -813,9 +762,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>5000</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_max_label_3">
@@ -844,9 +790,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_setpoint_label_3">
@@ -920,9 +863,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>HV03</string>
-      </property>
      </widget>
      <widget class="QLabel" name="model_information_name_label_4">
       <property name="geometry">
@@ -969,9 +909,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>250</string>
-      </property>
      </widget>
      <widget class="QLineEdit" name="model_information_max_line_4">
       <property name="geometry">
@@ -981,9 +918,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>5000</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_max_label_4">
@@ -1012,9 +946,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_setpoint_label_4">
@@ -1088,9 +1019,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>HV02</string>
-      </property>
      </widget>
      <widget class="QLabel" name="model_information_name_label_5">
       <property name="geometry">
@@ -1137,9 +1065,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>150</string>
-      </property>
      </widget>
      <widget class="QLineEdit" name="model_information_max_line_5">
       <property name="geometry">
@@ -1149,9 +1074,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>3000</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_max_label_5">
@@ -1180,9 +1102,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_setpoint_label_5">
@@ -1256,9 +1175,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>HV01</string>
-      </property>
      </widget>
      <widget class="QLabel" name="model_information_name_label_6">
       <property name="geometry">
@@ -1305,9 +1221,6 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text">
-       <string>150</string>
-      </property>
      </widget>
      <widget class="QLineEdit" name="model_information_max_line_6">
       <property name="geometry">
@@ -1317,9 +1230,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>3000</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_max_label_6">
@@ -1348,9 +1258,6 @@
         <width>101</width>
         <height>20</height>
        </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
       </property>
      </widget>
      <widget class="QLabel" name="model_information_setpoint_label_6">
@@ -1492,9 +1399,6 @@
       <property name="maximum">
        <number>200</number>
       </property>
-      <property name="value">
-       <number>100</number>
-      </property>
      </widget>
      <widget class="QLabel" name="new_setting_delta_label_1">
       <property name="geometry">
@@ -1572,9 +1476,6 @@
       </property>
       <property name="maximum">
        <number>200</number>
-      </property>
-      <property name="value">
-       <number>100</number>
       </property>
      </widget>
      <widget class="QLabel" name="new_setting_delta_label_2">
@@ -1654,9 +1555,6 @@
       <property name="maximum">
        <number>200</number>
       </property>
-      <property name="value">
-       <number>100</number>
-      </property>
      </widget>
      <widget class="QLabel" name="new_setting_delta_label_3">
       <property name="geometry">
@@ -1734,9 +1632,6 @@
       </property>
       <property name="maximum">
        <number>200</number>
-      </property>
-      <property name="value">
-       <number>50</number>
       </property>
      </widget>
      <widget class="QLabel" name="new_setting_delta_label_4">
@@ -1816,9 +1711,6 @@
       <property name="maximum">
        <number>200</number>
       </property>
-      <property name="value">
-       <number>50</number>
-      </property>
      </widget>
      <widget class="QLabel" name="new_setting_delta_label_5">
       <property name="geometry">
@@ -1896,9 +1788,6 @@
       </property>
       <property name="maximum">
        <number>200</number>
-      </property>
-      <property name="value">
-       <number>25</number>
       </property>
      </widget>
      <widget class="QLabel" name="new_setting_delta_label_6">
