@@ -1,5 +1,9 @@
 import json
+
+import numpy as np
+
 import hvc_controller
+import main_controller
 import microGC_controller
 
 from os import getcwd
@@ -7,8 +11,9 @@ from PyQt5 import QtCore, QtWidgets
 
 
 class FileBrowserController(QtWidgets.QMainWindow):
-    def __init__(self, save_file=False, open_file=False, microGC=False, hvc=False, hvc_data=None, microGC_data=None):
+    def __init__(self, save_file=False, open_file=False, microGC=False, hvc=False, main=False, hvc_data=None, microGC_data=None):
         QtWidgets.QMainWindow.__init__(self)
+        self.MainWindow = None
         self.window_hvc = None
         self.open_filename = None
         self.filename = None
@@ -84,6 +89,9 @@ class FileBrowserController(QtWidgets.QMainWindow):
         if open_file and microGC:
             self.save_cancel.accepted.connect(self.open_microGC)
 
+        if open_file and main:
+            self.save_cancel.accepted.connect(self.load_data)
+
         self.save_cancel.rejected.connect(self.close)
 
     # This will set the directory to all, if called upon
@@ -143,6 +151,20 @@ class FileBrowserController(QtWidgets.QMainWindow):
                 microGC_settings = json.load(f)
                 self.window_GC = microGC_controller.MicroGcController(file=True, data=microGC_settings)
                 print(f'File {open_filename} is opened')
+        except Exception as e:
+            print(f'{e}')
+        self.close()
+
+    # This function will open the main window with a selected file
+    def load_data(self):
+        open_filename = self.file_line.text()
+        try:
+            file = getcwd() + '/Files/' + open_filename
+            test_file_time = np.loadtxt(file, skiprows=3, usecols=0)
+            test_file_Ch1_FF_intensity = np.loadtxt(file, skiprows=3, usecols=1)
+            test_file_Ch2_FF_intensity = np.loadtxt(file, skiprows=3, usecols=5)
+            data = [test_file_time, test_file_Ch1_FF_intensity, test_file_Ch2_FF_intensity]
+            self.MainWindow = main_controller.Controller(load=True, data=data)
         except Exception as e:
             print(f'{e}')
         self.close()

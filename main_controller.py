@@ -1,23 +1,24 @@
+import os
 import h5py
 import numpy as np
-import values as v
+import file_browser
 
-# from time import time, sleep
-from sys import argv, exit
 from PyQt5 import QtWidgets
-# from PyQt5.QtCore import QObject, pyqtSignal
 from chiralMS_controller import ChiralMsController
 from injector_controller import Injector_controller
 from microGC_controller import MicroGcController
 from real_gui import Ui_MainWindow
 
+# from time import time, sleep
+# from PyQt5.QtCore import QObject, pyqtSignal
+
 
 class Controller:
-    def __init__(self):
+    def __init__(self, load=False, data=None):
         self.window_in = None
         self.window_GC = None
         self.window_MS = None
-        app = QtWidgets.QApplication(argv)
+        self.fileBrowserWidget = None
         self.MainWindow = QtWidgets.QMainWindow()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self.MainWindow)
@@ -26,22 +27,16 @@ class Controller:
         # Maximizing the screen
         self.MainWindow.showMaximized()
 
-        # Disabling the plots
-        self.ui.chromatogram1.setEnabled(False)
-        self.ui.chromatogram2.setEnabled(False)
-        self.ui.mass_spectrum.setEnabled(False)
-        self.ui.electron_image.setEnabled(False)
-
         # The buttons and their functions
         self.ui.injector_settings_button.clicked.connect(self.open_injector_window)
         self.ui.microGC_settings_button.clicked.connect(self.open_micro_gc_window)
         self.ui.chiralMS_settings_button.clicked.connect(self.open_chiral_ms_window)
+        self.ui.action_Open.triggered.connect(self.open_file)
 
         # # The start and stop button
         self.ui.start_button.clicked.connect(self.start)
         self.ui.stop_button.clicked.connect(self.stop)
 
-        self.ui.electron_image.canvas.fig.axes.clear()
         # The chromatogram and mass spectrum settings
         self.ui.chromatogram1.canvas.fig.suptitle('Ch1 (FF)')
         self.ui.chromatogram2.canvas.fig.suptitle('Ch2 (FF)')
@@ -56,8 +51,18 @@ class Controller:
         self.ui.mass_spectrum.canvas.fig.text(0.85, 0.05, 'Index nr.', ha='center', va='center')
         self.ui.mass_spectrum.canvas.fig.text(0.05, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
 
-        # Executing the application
-        exit(app.exec_())
+        # Load data from supplied file, else demo file
+        if load:
+            self.ui.demo_label.hide()
+            self.test_file_time = data[0]
+            self.test_file_Ch1_FF_intensity = data[1]
+            self.test_file_Ch2_FF_intensity = data[2]
+        else:
+            self.ui.demo_label.show()
+            file_name = os.getcwd() + '/Files/Demo_file.txt'
+            self.test_file_time = np.loadtxt(file_name, skiprows=3, usecols=0)
+            self.test_file_Ch1_FF_intensity = np.loadtxt(file_name, skiprows=3, usecols=1)
+            self.test_file_Ch2_FF_intensity = np.loadtxt(file_name, skiprows=3, usecols=5)
 
     # Start the data acquisition
     def start(self):
@@ -72,8 +77,8 @@ class Controller:
         # Plotting the chromatograms
         self.ui.chromatogram1.canvas.ax.clear()
         self.ui.chromatogram2.canvas.ax.clear()
-        self.ui.chromatogram1.canvas.ax.plot(v.test_file_time, v.test_file_Ch1_FF_intensity)
-        self.ui.chromatogram2.canvas.ax.plot(v.test_file_time, v.test_file_Ch2_FF_intensity)
+        self.ui.chromatogram1.canvas.ax.plot(self.test_file_time, self.test_file_Ch1_FF_intensity)
+        self.ui.chromatogram2.canvas.ax.plot(self.test_file_time, self.test_file_Ch2_FF_intensity)
         self.ui.chromatogram1.canvas.draw()
         self.ui.chromatogram2.canvas.draw()
 
@@ -100,14 +105,14 @@ class Controller:
         if event.dblclick:
             try:
                 ix = round(float(event.xdata), 2)  # Location of the plot click
-                index = np.where(v.test_file_time == ix)[0][0]  # Index location on where the line_x should appear
-                line_x = v.test_file_time[index]
+                index = np.where(self.test_file_time == ix)[0][0]  # Index location on where the line_x should appear
+                line_x = self.test_file_time[index]
                 self.ui.chromatogram1.canvas.ax.clear()
                 self.ui.chromatogram2.canvas.ax.clear()
-                self.ui.chromatogram1.canvas.ax.plot(v.test_file_time, v.test_file_Ch1_FF_intensity)
-                self.ui.chromatogram2.canvas.ax.plot(v.test_file_time, v.test_file_Ch2_FF_intensity)
-                self.ui.chromatogram1.canvas.ax.plot([line_x, line_x], [min(v.test_file_Ch1_FF_intensity), max(v.test_file_Ch1_FF_intensity)])
-                self.ui.chromatogram2.canvas.ax.plot([line_x, line_x], [min(v.test_file_Ch2_FF_intensity), max(v.test_file_Ch2_FF_intensity)])
+                self.ui.chromatogram1.canvas.ax.plot(self.test_file_time, self.test_file_Ch1_FF_intensity)
+                self.ui.chromatogram2.canvas.ax.plot(self.test_file_time, self.test_file_Ch2_FF_intensity)
+                self.ui.chromatogram1.canvas.ax.plot([line_x, line_x], [min(self.test_file_Ch1_FF_intensity), max(self.test_file_Ch1_FF_intensity)])
+                self.ui.chromatogram2.canvas.ax.plot([line_x, line_x], [min(self.test_file_Ch2_FF_intensity), max(self.test_file_Ch2_FF_intensity)])
                 self.ui.chromatogram1.canvas.draw()
                 self.ui.chromatogram2.canvas.draw()
                 self.ui.mass_spectrum.canvas.ax.clear()
@@ -128,7 +133,7 @@ class Controller:
 
                 # Selecting the electron image based on which location of the plot has been clicked
                 with h5py.File('Files/example.h5', 'r') as f:
-                    picture_nr = round(abs(round(ix)) / max(v.test_file_time) * 9)
+                    picture_nr = round(abs(round(ix)) / max(self.test_file_time) * 9)
                     electron_list = list(f.keys())[0]
                     electron_images = f[electron_list][()]
                     self.ui.electron_image.canvas.ax.imshow(electron_images[picture_nr])
@@ -148,6 +153,12 @@ class Controller:
     # The function to open the chiral MS window
     def open_chiral_ms_window(self):
         self.window_MS = ChiralMsController()
+
+    def open_file(self):
+        self.MainWindow.close()
+        self.fileBrowserWidget = file_browser.FileBrowserController(open_file=True, main=True)
+        self.fileBrowserWidget.show()
+        self.fileBrowserWidget.set_path()
 
 #
 # # The hard workers, also known as the threads

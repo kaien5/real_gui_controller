@@ -1,16 +1,10 @@
-import numpy as np
-
+# The settings for the Threads
 check1 = True
 check2 = True
 i1 = 0
 i2 = 0
-first_open = True
-test_file = 'Files/016890100000_10-26-2022_094626 (GMT+1).txt'
-test_file_time = np.loadtxt(test_file, skiprows=3, usecols=0)
-test_file_Ch1_FF_intensity = np.loadtxt(test_file, skiprows=3, usecols=1)
-test_file_Ch2_FF_intensity = np.loadtxt(test_file, skiprows=3, usecols=5)
 
-
+# The standard settings for the HVC and microGC
 standard_hvc_settings = {"ip address": "0.0.0.0", "connection name 1": "Nozzle", "connection name 2": "V2", "connection name 3": "V1",
                          "connection name 4": "Anode", "connection name 5": "V3", "connection name 6": "MCP", "module name 1": "HV06",
                          "module name 2": "HV05", "module name 3": "HV04", "module name 4": "HV03", "module name 5": "HV02", "module name 6": "HV01",

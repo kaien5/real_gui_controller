@@ -222,6 +222,9 @@
     </widget>
    </widget>
    <widget class="MplWidget" name="mass_spectrum">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>290</x>
@@ -232,6 +235,9 @@
     </property>
    </widget>
    <widget class="MplWidget" name="electron_image">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>1100</x>
@@ -258,6 +264,9 @@
       <string>Ch1 (FF)</string>
      </attribute>
      <widget class="MplWidget" name="chromatogram1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -273,6 +282,9 @@
       <string>Ch2 (FF)</string>
      </attribute>
      <widget class="MplWidget" name="chromatogram2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -284,7 +296,49 @@
      </widget>
     </widget>
    </widget>
+   <widget class="QLabel" name="demo_label">
+    <property name="geometry">
+     <rect>
+      <x>1030</x>
+      <y>0</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>20</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Demo_file</string>
+    </property>
+   </widget>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1920</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_Open">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="action_Open"/>
+   </widget>
+   <addaction name="menu_Open"/>
+  </widget>
+  <action name="action_Open">
+   <property name="text">
+    <string>&amp;Open</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

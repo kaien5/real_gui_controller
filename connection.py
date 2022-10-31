@@ -1,49 +1,39 @@
 import socket
 
-# port = 7197
-port = 502
+IP = '127.0.0.1'
+# IP = '145.76.121.84'
+# IP = 'localhost'
+port = 7197
+# port = 502
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+    try:
+        s.connect((IP, port))
+        # s.bind((IP, port))
+        print("Connected")
+    except Exception as e:
+        print("Cannot connect to the server:", e)
 
-try:
-    s.connect(('127.0.0.1', port))
-except Exception as e:
-    print("Cannot connect to the server:", e)
-print("Connected")
-message = b"{TLA}\r\n"
+    # s.connect((IP, port))
+    message = "R{TLA}\r\n"
+    message = message.encode('utf-8')
+    print(message)
 
+    # s.sendto(message.encode('utf-8'), (IP, port))
+    s.sendto(message, (IP, port))
 
-# s.sendto(message.encode('utf-16'), ('127.0.0.1', port))
-s.sendto(message, ('127.0.0.1', port))
-receive = s.recvfrom(1024)
-print(receive)
+    receive, adr = s.recvfrom(4096)
+    print(receive)
 
-
-# import minimalmodbus
-# instrument = minimalmodbus.Instrument('/dev/ttyUSB1', 1)
+# """This is working for communication through modbus"""
+# from pymodbus.client.sync import ModbusTcpClient
 #
-# try:
-#     print(instrument.read_register(30300))
-# except IOError:
-#     print('Failed to read from instrument')
-# except ValueError:
-#     print('Instrument response in invalid')
-
-
-# import serial
+# IP = '127.0.0.1'
+# PORT = '502'
+# client = ModbusTcpClient(host=IP, port=PORT)
+# client.connect()
+# print(client.is_socket_open())
 #
-# ser = serial.Serial()
-# ser.port = 'COM1'
-# ser.baudrate = 9600
-# ser.bytesize = serial.SEVENBITS
-# ser.parity = serial.PARITY_NONE
-# ser.stopbits = serial.STOPBITS_ONE
-# ser.timeout = 3
-#
-# ser.open()
-#
-# # device_write = ser.write(bytearray.fromhex('AA 55 00 00 07 00 12 19 00'))
-# device_write = ser.write(b'R{TLA}\r\n')
-# print(ser.readall())
-# device_read = ser.read_until()
-# print(device_read)
+# register = 0x03E8
+# client.write_coil(register, 5)
+# client.write_coil(0x044C, 1)
