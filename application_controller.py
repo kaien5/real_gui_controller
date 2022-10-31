@@ -2,7 +2,7 @@ from sys import argv
 
 from PyQt5 import QtWidgets
 
-import main_controller
+import main_gui_controller
 from application import Ui_Application_name
 
 
@@ -18,4 +18,4 @@ class ApplicationController:
         exit(app.exec_())
 
     def start(self):
-        self.runner2 = main_controller.Controller()
+        self.runner2 = main_gui_controller.Controller()

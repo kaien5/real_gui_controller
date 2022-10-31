@@ -1,9 +1,7 @@
 import json
-
 import numpy as np
-
 import hvc_controller
-import main_controller
+import main_gui_controller
 import microGC_controller
 
 from os import getcwd
@@ -18,6 +16,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
         self.open_filename = None
         self.filename = None
         self.window_GC = None
+
         self.setGeometry(560, 240, 600, 600)
         self.fileBrowserWidget = QtWidgets.QWidget(self)
         self.setCentralWidget(self.fileBrowserWidget)
@@ -97,7 +96,6 @@ class FileBrowserController(QtWidgets.QMainWindow):
     # This will set the directory to all, if called upon
     def set_path(self):
         self.dir_model.setRootPath("")
-        print(self.dir_model.rootPath())
 
     # Get selected path of folder_view
     def clicked(self):
@@ -132,7 +130,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
                 self.window_hvc = hvc_controller.HvcController(file=True, data=hvc_settings)
                 print(f'File {open_filename} is opened')
         except Exception as e:
-            print(f'{e}')
+            print(e)
         self.close()
 
     # This function will save the microGC settings in a json file
@@ -152,7 +150,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
                 self.window_GC = microGC_controller.MicroGcController(file=True, data=microGC_settings)
                 print(f'File {open_filename} is opened')
         except Exception as e:
-            print(f'{e}')
+            print(e)
         self.close()
 
     # This function will open the main window with a selected file
@@ -164,7 +162,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
             test_file_Ch1_FF_intensity = np.loadtxt(file, skiprows=3, usecols=1)
             test_file_Ch2_FF_intensity = np.loadtxt(file, skiprows=3, usecols=5)
             data = [test_file_time, test_file_Ch1_FF_intensity, test_file_Ch2_FF_intensity]
-            self.MainWindow = main_controller.Controller(load=True, data=data)
+            self.MainWindow = main_gui_controller.Controller(load=True, data=data)
         except Exception as e:
-            print(f'{e}')
+            print(e)
         self.close()

@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from injector_settings import Ui_injector_settings
+from injector import Ui_injector_settings
 
 
 class Injector_controller:

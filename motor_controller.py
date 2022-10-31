@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from motor_control_settings import Ui_motor_control_settings
+from motor import Ui_motor_control_settings
 
 
 class MotorController:

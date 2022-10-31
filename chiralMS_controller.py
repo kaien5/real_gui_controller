@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from chiralMS_settings import Ui_chiralMS_settings
+from chiralMS import Ui_chiralMS_settings
 from hvc_controller import HvcController
 from motor_controller import MotorController
 

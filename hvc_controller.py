@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 import values as v
 import file_browser
-from high_voltage_control import Ui_high_voltage_control
+from hvc import Ui_high_voltage_control
 
 
 class HvcController:

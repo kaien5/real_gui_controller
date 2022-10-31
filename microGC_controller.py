@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem
-from microGC_settings import Ui_microGC_settings
+from microGC import Ui_microGC_settings
 
 import values as v
 import file_browser
