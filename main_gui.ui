@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1920</width>
-    <height>1015</height>
+    <width>1916</width>
+    <height>1006</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -83,24 +83,6 @@
      </property>
      <property name="text">
       <string>MicroGC</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="chiralMS_settings_button">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>240</y>
-       <width>201</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>14</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>ChiralMS</string>
      </property>
     </widget>
     <widget class="QPushButton" name="start_button">
@@ -220,6 +202,42 @@
       <string>STOP</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="hvc_settings_button">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>240</y>
+       <width>201</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Voltage control</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="motor_settings_button">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>320</y>
+       <width>201</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Motor Control</string>
+     </property>
+    </widget>
    </widget>
    <widget class="MplWidget" name="mass_spectrum">
     <property name="enabled">
@@ -322,8 +340,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1920</width>
-     <height>21</height>
+     <width>1916</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Open">

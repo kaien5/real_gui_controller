@@ -4,7 +4,9 @@ import numpy as np
 import file_browser
 
 from PyQt5 import QtWidgets
-from chiralMS_controller import ChiralMsController
+
+import hvc_controller
+import motor_controller
 from injector_controller import Injector_controller
 from microGC_controller import MicroGcController
 from main_gui import Ui_MainWindow
@@ -17,7 +19,8 @@ class Controller:
     def __init__(self, load=False, data=None):
         self.window_in = None
         self.window_GC = None
-        self.window_MS = None
+        self.window_hvc = None
+        self.window_motor = None
         self.fileBrowserWidget = None
         self.MainWindow = QtWidgets.QMainWindow()
         self.ui = Ui_MainWindow()
@@ -30,7 +33,8 @@ class Controller:
         # The buttons and their functions
         self.ui.injector_settings_button.clicked.connect(self.open_injector_window)
         self.ui.microGC_settings_button.clicked.connect(self.open_micro_gc_window)
-        self.ui.chiralMS_settings_button.clicked.connect(self.open_chiral_ms_window)
+        self.ui.hvc_settings_button.clicked.connect(self.open_hvc_window)
+        self.ui.motor_settings_button.clicked.connect(self.open_motor_window)
         self.ui.action_Open.triggered.connect(self.open_file)
 
         # # The start and stop button
@@ -150,9 +154,11 @@ class Controller:
     def open_micro_gc_window(self):
         self.window_GC = MicroGcController()
 
-    # The function to open the chiral MS window
-    def open_chiral_ms_window(self):
-        self.window_MS = ChiralMsController()
+    def open_hvc_window(self):
+        self.window_hvc = hvc_controller.HvcController()
+
+    def open_motor_window(self):
+        self.window_motor = motor_controller.MotorController()
 
     def open_file(self):
         self.MainWindow.close()

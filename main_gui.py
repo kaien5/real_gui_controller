@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'real_gui.ui'
+# Form implementation generated from reading ui file 'main_gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -42,12 +42,6 @@ class Ui_MainWindow(object):
         font.setPointSize(14)
         self.microGC_settings_button.setFont(font)
         self.microGC_settings_button.setObjectName("microGC_settings_button")
-        self.chiralMS_settings_button = QtWidgets.QPushButton(self.settings_mainWindow_frame)
-        self.chiralMS_settings_button.setGeometry(QtCore.QRect(20, 240, 201, 61))
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.chiralMS_settings_button.setFont(font)
-        self.chiralMS_settings_button.setObjectName("chiralMS_settings_button")
         self.start_button = QtWidgets.QPushButton(self.settings_mainWindow_frame)
         self.start_button.setGeometry(QtCore.QRect(20, 880, 91, 51))
         palette = QtGui.QPalette()
@@ -87,6 +81,18 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.stop_button.setFont(font)
         self.stop_button.setObjectName("stop_button")
+        self.hvc_settings_button = QtWidgets.QPushButton(self.settings_mainWindow_frame)
+        self.hvc_settings_button.setGeometry(QtCore.QRect(20, 240, 201, 61))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.hvc_settings_button.setFont(font)
+        self.hvc_settings_button.setObjectName("hvc_settings_button")
+        self.motor_settings_button = QtWidgets.QPushButton(self.settings_mainWindow_frame)
+        self.motor_settings_button.setGeometry(QtCore.QRect(20, 320, 201, 61))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.motor_settings_button.setFont(font)
+        self.motor_settings_button.setObjectName("motor_settings_button")
         self.mass_spectrum = MplWidget(self.centralwidget)
         self.mass_spectrum.setEnabled(False)
         self.mass_spectrum.setGeometry(QtCore.QRect(290, 410, 811, 581))
@@ -142,9 +148,10 @@ class Ui_MainWindow(object):
         self.injector_settings_button.setText(_translate("MainWindow", "Injector"))
         self.settings_label.setText(_translate("MainWindow", "Settings"))
         self.microGC_settings_button.setText(_translate("MainWindow", "MicroGC"))
-        self.chiralMS_settings_button.setText(_translate("MainWindow", "ChiralMS"))
         self.start_button.setText(_translate("MainWindow", "START"))
         self.stop_button.setText(_translate("MainWindow", "STOP"))
+        self.hvc_settings_button.setText(_translate("MainWindow", "Voltage control"))
+        self.motor_settings_button.setText(_translate("MainWindow", "Motor Control"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Ch1 (FF)"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Ch2 (FF)"))
         self.demo_label.setText(_translate("MainWindow", "Demo_file"))
