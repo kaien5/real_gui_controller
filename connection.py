@@ -25,18 +25,16 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     # Message that is received will have to be decoded, sliced and stitched in order for retrieval command
     time_stamp = receive[6:27].decode('utf-8')
-    print(receive)
     message_slice = time_stamp[:3] + time_stamp[4:6] + time_stamp[7:11] + '_' + time_stamp[12:14] + time_stamp[15:17] + time_stamp[18:21]
     message2 = "R{CD1," + message_slice + "}\r\n"
     message2 = message2.encode('utf-8')
 
     # Send message to receive payload from last measurement taken
     s.sendto(message2, (IP, port))
-    receive, adr = s.recvfrom(4096)
-    print(receive)
+    receive, adr = s.recvfrom(40960)
 
     # Defining the payload
-    payload = receive[7:-1]
+    payload = receive[7:-4]
     # print(f'Length {len(payload)} : {payload}')
 
     # Step 1: Base64 decoding
@@ -44,7 +42,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print(f'Length {len(decoded)} : {decoded}\n')
 
     # Size of the lookup table
-    size = struct.unpack('!H', decoded[:2])[0]  # Not sure about the 'H' unpacking
+    size = struct.unpack('!H', decoded[:2])[0]
     print(f'The size of the lookup table is: {size}')
 
     # Step 2: Decompression
@@ -58,14 +56,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     lookup_table = struct.unpack(decode_string['decodeString'], lookup_table)
 
     # The list of references
-    list_of_references = decoded[2 + size * 4:]
+    list_of_references = decoded[2 + size * 4:-2]
     print(f'List of reference: {list_of_references}')
     print(f'With byte length: {len(list_of_references)}\n')
 
     # Decoding the list of references
     decode_string2 = {'decodeString': '!' + (str(int(len(list_of_references)/2)) + 'H')}
     list_of_references = struct.unpack(decode_string2['decodeString'], list_of_references)
-    print(list(list_of_references))
 
     decompressed_value = [lookup_table[x] for x in list_of_references]
 
