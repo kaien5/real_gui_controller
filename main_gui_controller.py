@@ -14,6 +14,8 @@ from microGC_controller import MicroGcController
 from injector_controller import Injector_controller
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
+check = True
+
 
 class Controller:
     def __init__(self, load=False, data=None):
@@ -41,7 +43,6 @@ class Controller:
         # # The buttons and their functions
         self.ui.start_button.clicked.connect(self.start)
         self.ui.load_button.clicked.connect(self.load_data)
-        self.ui.check_microGC.clicked.connect(self.check_microGC)
         self.ui.enable_plots.toggled.connect(self.plots)
 
         # The chromatogram and mass spectrum settings
@@ -77,6 +78,11 @@ class Controller:
             self.Ch3_BF = data[3]
         else:
             file_name = os.getcwd() + '/Files/Demo_file.txt'
+            self.ui.chromatogram1.canvas.fig.suptitle('Demo Data')
+            self.ui.chromatogram2.canvas.fig.suptitle('Demo Data')
+            self.ui.chromatogram3.canvas.fig.suptitle('Demo Data')
+            self.ui.mass_spectrum.canvas.fig.suptitle('Demo Data')
+            self.ui.electron_image.canvas.fig.suptitle('Demo Data')
             self.time = np.loadtxt(file_name, skiprows=1, usecols=0)
             self.Ch1_FF = np.loadtxt(file_name, skiprows=1, usecols=1)
             self.Ch2_FF = np.loadtxt(file_name, skiprows=1, usecols=2)
@@ -84,36 +90,61 @@ class Controller:
 
     # Start the data acquisition
     def start(self):
-        # Disabling and enabling the buttons and plots
-        self.ui.start_button.setEnabled(False)
-        client = ModbusTcpClient(host='127.0.0.1', port='502')
-        client.connect()
+        try:
+            microGC_ip = self.ui.ip_address_microGC.text()
+            self.client = ModbusTcpClient(host=microGC_ip, port='502')
+            self.client.connect()
 
-        # This function will select the sequence to run and start as well
-        client.write_register(0x9C41, 0x0004)  # Selected sequence = 4
-        client.write_register(0x9D08, 0x0001)
-        client.close()
+            # This function will select the sequence to run and start as well
+            self.client.write_register(0x9D0A, 0x0001)  # Stop all queued sequences
+            self.client.write_register(0x9C41, 0x0004)  # Selected sequence = 4
+            self.client.write_register(0x9D08, 0x0001)
+            self.ui.start_button.setEnabled(False)
+            self.ui.load_button.setEnabled(False)
 
-        # Enabling the check MicroGC button
-        self.ui.check_microGC.setEnabled(True)
+            self.wait = True
+
+            self.thread1 = QThread()
+            self.worker1 = Worker1()
+            self.worker1.moveToThread(self.thread1)
+            self.thread1.started.connect(self.worker1.run)
+            self.worker1.finished1.connect(self.thread1.quit)
+            self.worker1.finished1.connect(self.worker1.deleteLater)
+            self.thread1.finished.connect(self.thread1.deleteLater)
+            self.worker1.progress1.connect(self.check_microGC)
+            self.thread1.start()
+
+        except Exception:
+            self.ui.microGC_status.setText('Invalid IP Address')
 
     # This is to check whether the MicroGC is busy
     def check_microGC(self):
-        client = ModbusTcpClient(host='127.0.0.1', port='502')
-        client.connect()
+        global check
 
-        response = client.read_discrete_inputs(0x2712, 1)
-        if response.bits[0]:
-            self.ui.microGC_status.setText('Status: Running')
+        if self.wait:
+            self.ui.microGC_status.setText('Waiting for response...')
+            response = self.client.read_discrete_inputs(0x2712, 1)
+            if response.bits[0]:
+                self.wait = False
+
         else:
-            self.ui.microGC_status.setText('Status: Done')
-            self.ui.start_button.setEnabled(True)
-            self.ui.load_button.setEnabled(True)
-            self.ui.check_microGC.setEnabled(False)
-        client.close()
+            response = self.client.read_discrete_inputs(0x2712, 1)
+            if response.bits[0]:
+                self.ui.microGC_status.setText('Running')
+            else:
+                self.ui.microGC_status.setText('Done')
+                self.ui.start_button.setEnabled(True)
+                self.ui.load_button.setEnabled(True)
+                check = False
+            self.client.close()
 
     def load_data(self):
         self.filename = dynamiq_import.load(7197)
+        self.ui.chromatogram1.canvas.fig.suptitle('Ch1 (FF)')
+        self.ui.chromatogram2.canvas.fig.suptitle('Ch2 (FF)')
+        self.ui.chromatogram3.canvas.fig.suptitle('Ch3 (BF)')
+        self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
+        self.ui.electron_image.canvas.fig.suptitle('Electron image')
         self.time = np.loadtxt(str(self.filename), skiprows=1, usecols=0)
         self.Ch1_FF = np.loadtxt(str(self.filename), skiprows=1, usecols=1)
         self.Ch2_FF = np.loadtxt(str(self.filename), skiprows=1, usecols=2)
@@ -242,19 +273,16 @@ class Controller:
         self.fileBrowserWidget.set_path()
 
 
-# # The hard workers, also known as the threads
-# class Worker1(QObject):
-#     finished1 = pyqtSignal()
-#     progress1 = pyqtSignal(int)
-#
-#     def run(self):
-#         while self.worker is True:
-#             tb = time()
-#             self.progress1.emit(v.i1 + 1)
-#             te = time()
-#             sleep(1 - (te - tb))  # Getting a more accurate sleep(1)
-#         self.finished1.emit()
+# The hard workers, also known as the threads
+class Worker1(QObject):
+    finished1 = pyqtSignal()
+    progress1 = pyqtSignal(int)
 
+    def run(self):
+        while check:
+            self.progress1.emit(1)
+            sleep(2)
+        self.finished1.emit()
 
 # class Worker2(QObject):
 #     finished2 = pyqtSignal()
