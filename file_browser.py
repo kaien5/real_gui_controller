@@ -159,9 +159,10 @@ class FileBrowserController(QtWidgets.QMainWindow):
         try:
             file = getcwd() + '/Files/' + open_filename
             test_file_time = np.loadtxt(file, skiprows=3, usecols=0)
-            test_file_Ch1_FF_intensity = np.loadtxt(file, skiprows=3, usecols=1)
-            test_file_Ch2_FF_intensity = np.loadtxt(file, skiprows=3, usecols=5)
-            data = [test_file_time, test_file_Ch1_FF_intensity, test_file_Ch2_FF_intensity]
+            Ch1_FF = np.loadtxt(file, skiprows=3, usecols=1)
+            Ch2_FF = np.loadtxt(file, skiprows=3, usecols=5)
+            Ch3_BF = np.loadtxt(file, skiprows=3, usecols=7)
+            data = [test_file_time, Ch1_FF, Ch2_FF, Ch3_BF]
             self.MainWindow = main_gui_controller.Controller(load=True, data=data)
         except Exception as e:
             print(e)

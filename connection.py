@@ -74,9 +74,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     # Step 4: convert to physical values
     integrated_value = decompressed_value
     chromatogram_value = [x * 0.0001 for x in integrated_value]
+    time_value = []
+    for _ in range(len(chromatogram_value)):
+        time_value.append(_/100)
 
     # Plotting the chromatogram_value
-    plt.plot(chromatogram_value)
+    plt.plot(time_value, chromatogram_value)
     plt.show()
 
 # """This is working for communication through modbus"""
@@ -92,5 +95,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 # client.write_register(0x9C41, 0x0004)
 # client.write_register(0x9D08, 0x0001)
 #
-# This function will start a sequence method
+# # This function will start a sequence method
 # client.write_coil(0x044C, 0x01)

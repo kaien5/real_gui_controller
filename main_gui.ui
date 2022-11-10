@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1916</width>
-    <height>1006</height>
+    <width>1912</width>
+    <height>997</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -142,10 +142,7 @@
       <string>START</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="stop_button">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
+    <widget class="QPushButton" name="load_button">
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -199,7 +196,7 @@
       </font>
      </property>
      <property name="text">
-      <string>STOP</string>
+      <string>LOAD</string>
      </property>
     </widget>
     <widget class="QPushButton" name="hvc_settings_button">
@@ -236,6 +233,24 @@
      </property>
      <property name="text">
       <string>Motor Control</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="enable_plots">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>810</y>
+       <width>191</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>18</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Enable Plots</string>
      </property>
     </widget>
    </widget>
@@ -313,26 +328,24 @@
       </property>
      </widget>
     </widget>
-   </widget>
-   <widget class="QLabel" name="demo_label">
-    <property name="geometry">
-     <rect>
-      <x>1030</x>
-      <y>0</y>
-      <width>141</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>20</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Demo_file</string>
-    </property>
+    <widget class="QWidget" name="">
+     <attribute name="title">
+      <string>Ch3 (BF)</string>
+     </attribute>
+     <widget class="MplWidget" name="chromatogram3">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1591</width>
+        <height>381</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -340,8 +353,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1916</width>
-     <height>26</height>
+     <width>1912</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Open">
