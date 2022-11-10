@@ -1,20 +1,17 @@
 import os
 import h5py
 import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt
-
-import dynamiq_import
 import file_browser
+import dynamiq_import
 import hvc_controller
 import motor_controller
 
 from PyQt5 import QtWidgets
+from time import time, sleep
 from main_gui import Ui_MainWindow
 from pymodbus.client.sync import ModbusTcpClient
 from microGC_controller import MicroGcController
 from injector_controller import Injector_controller
-from time import time, sleep
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
 
@@ -44,6 +41,7 @@ class Controller:
         # # The buttons and their functions
         self.ui.start_button.clicked.connect(self.start)
         self.ui.load_button.clicked.connect(self.load_data)
+        self.ui.check_microGC.clicked.connect(self.check_microGC)
         self.ui.enable_plots.toggled.connect(self.plots)
 
         # The chromatogram and mass spectrum settings
@@ -79,25 +77,43 @@ class Controller:
             self.Ch3_BF = data[3]
         else:
             file_name = os.getcwd() + '/Files/Demo_file.txt'
-            self.time = np.loadtxt(file_name, skiprows=3, usecols=0)
-            self.Ch1_FF = np.loadtxt(file_name, skiprows=3, usecols=1)
-            self.Ch2_FF = np.loadtxt(file_name, skiprows=3, usecols=5)
-            self.Ch3_BF = np.loadtxt(file_name, skiprows=3, usecols=7)
+            self.time = np.loadtxt(file_name, skiprows=1, usecols=0)
+            self.Ch1_FF = np.loadtxt(file_name, skiprows=1, usecols=1)
+            self.Ch2_FF = np.loadtxt(file_name, skiprows=1, usecols=2)
+            self.Ch3_BF = np.loadtxt(file_name, skiprows=1, usecols=3)
 
     # Start the data acquisition
     def start(self):
         # Disabling and enabling the buttons and plots
         self.ui.start_button.setEnabled(False)
+        client = ModbusTcpClient(host='127.0.0.1', port='502')
+        client.connect()
 
-        # client = ModbusTcpClient(host='127.0.0.1', port='502')
-        # client.connect()
-        #
-        # # This function will select the sequence to run and start as well
-        # client.write_register(0x9C41, 0x0004)
-        # client.write_register(0x9D08, 0x0001)
+        # This function will select the sequence to run and start as well
+        client.write_register(0x9C41, 0x0004)  # Selected sequence = 4
+        client.write_register(0x9D08, 0x0001)
+        client.close()
+
+        # Enabling the check MicroGC button
+        self.ui.check_microGC.setEnabled(True)
+
+    # This is to check whether the MicroGC is busy
+    def check_microGC(self):
+        client = ModbusTcpClient(host='127.0.0.1', port='502')
+        client.connect()
+
+        response = client.read_discrete_inputs(0x2712, 1)
+        if response.bits[0]:
+            self.ui.microGC_status.setText('Status: Running')
+        else:
+            self.ui.microGC_status.setText('Status: Done')
+            self.ui.start_button.setEnabled(True)
+            self.ui.load_button.setEnabled(True)
+            self.ui.check_microGC.setEnabled(False)
+        client.close()
 
     def load_data(self):
-        self.filename = dynamiq_import.DynamiQImport.load('192.0.0.1', 7197)
+        self.filename = dynamiq_import.load(7197)
         self.time = np.loadtxt(str(self.filename), skiprows=1, usecols=0)
         self.Ch1_FF = np.loadtxt(str(self.filename), skiprows=1, usecols=1)
         self.Ch2_FF = np.loadtxt(str(self.filename), skiprows=1, usecols=2)
