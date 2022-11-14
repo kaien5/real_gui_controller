@@ -6,8 +6,8 @@ import dynamiq_import
 import hvc_controller
 import motor_controller
 
+from time import sleep
 from PyQt5 import QtWidgets
-from time import time, sleep
 from main_gui import Ui_MainWindow
 from pymodbus.client.sync import ModbusTcpClient
 from microGC_controller import MicroGcController
@@ -139,7 +139,8 @@ class Controller:
             self.client.close()
 
     def load_data(self):
-        self.filename = dynamiq_import.load(7197)
+        microGC_ip = self.ui.ip_address_microGC.text()
+        self.filename = dynamiq_import.load(host=microGC_ip, port=7197)
         self.ui.chromatogram1.canvas.fig.suptitle('Ch1 (FF)')
         self.ui.chromatogram2.canvas.fig.suptitle('Ch2 (FF)')
         self.ui.chromatogram3.canvas.fig.suptitle('Ch3 (BF)')

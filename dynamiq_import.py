@@ -5,12 +5,10 @@ import pandas as pd
 from os import getcwd
 
 
-def load(ip=None, port=None):
-    ip = '127.0.0.1'
-    port = 7197
+def load(host=None, port=None):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
-            s.connect((ip, port))
+            s.connect((host, port))
         except Exception as e:
             print("Cannot connect to the server:", e)
 
@@ -18,7 +16,7 @@ def load(ip=None, port=None):
         message = "R{TLA}\r\n".encode('utf-8')
 
         # Send and receive message
-        s.sendto(message, (ip, port))
+        s.sendto(message, (host, port))
         receive, adr = s.recvfrom(4096)
 
         # Message that is received will have to be decoded, sliced and stitched in order for retrieval command
@@ -29,7 +27,7 @@ def load(ip=None, port=None):
             message2 = message2.encode('utf-8')
 
             # Send message to receive payload from last measurement taken
-            s.sendto(message2, (ip, port))
+            s.sendto(message2, (host, port))
             receive, adr = s.recvfrom(64000)
 
             # Defining the payload
