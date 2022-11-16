@@ -129,7 +129,6 @@ number_of_sequences = time.registers[0]
 #     sequence_names['Sequence ' + str(i)] = decoder.decode_string(20).decode()
 # print(sequence_names)
 # print(sequence_names['Sequence 1'])
-
 register = client.read_input_registers(30702, 2)
 raw = struct.pack('>HH', register.registers[0], register.registers[1])
 print(struct.unpack('>f', raw)[0])  # This will print the float value of register 30702

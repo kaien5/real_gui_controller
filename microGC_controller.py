@@ -1,5 +1,8 @@
+import struct
+
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem
+from pymodbus.client.sync import ModbusTcpClient
 from microGC import Ui_microGC_settings
 
 import values as v
@@ -21,8 +24,9 @@ class MicroGcController:
 
         # The buttons and their function
         self.ui_GC.set_graph.clicked.connect(self.update_graph)
-        self.ui_GC.add_row.clicked.connect(self.add_row)
+        self.ui_GC.refresh_button.clicked.connect(self.refresh)
         self.ui_GC.remove_row.clicked.connect(self.remove_row)
+        self.ui_GC.add_row.clicked.connect(self.add_row)
 
         # The Drop-down menu and their functions
         self.ui_GC.action_Save.triggered.connect(self.save_file_browser)
@@ -58,6 +62,29 @@ class MicroGcController:
             self.ui_GC.temperature_table.setItem(i, 0, QTableWidgetItem(microGC_settings["Rate"][i]))
             self.ui_GC.temperature_table.setItem(i, 1, QTableWidgetItem(microGC_settings["Final temp"][i]))
             self.ui_GC.temperature_table.setItem(i, 2, QTableWidgetItem(microGC_settings["Hold time"][i]))
+
+    def refresh(self):
+        try:
+            microGC_ip = self.ui_GC.ip_address.text()
+            self.client = ModbusTcpClient(host=microGC_ip, port='502')
+            self.client.connect()
+
+            test = [30900, 30916, 30908, 30700]  # 30700 might be wrong
+            data = {}
+            for i in test:
+                register = self.client.read_input_registers(i, 2)
+                raw = struct.pack('>HH', register.registers[0], register.registers[1])
+                data['Register ' + str(i)] = str(struct.unpack('>f', raw)[0])
+
+            self.ui_GC.column_oven_temp.setText(str(data['Register 30900']))
+            self.ui_GC.column_pressure.setText(str(data['Register 30916']))
+            self.ui_GC.injection_temp.setText(str(data['Register 30908']))
+            self.ui_GC.heated_sample_line_temp.setText(str(data['Register 30700']))
+
+            self.client.close()
+
+        except Exception as e:
+            print(e)
 
     # Opening the save file browser and supplying the settings
     def save_file_browser(self):

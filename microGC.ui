@@ -391,7 +391,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>70</y>
+      <y>90</y>
       <width>141</width>
       <height>16</height>
      </rect>
@@ -409,7 +409,7 @@
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>70</y>
+      <y>90</y>
       <width>31</width>
       <height>16</height>
      </rect>
@@ -427,7 +427,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>70</y>
+      <y>90</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -440,7 +440,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>100</y>
+      <y>120</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -453,7 +453,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>100</y>
+      <y>120</y>
       <width>161</width>
       <height>16</height>
      </rect>
@@ -471,7 +471,7 @@
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>100</y>
+      <y>120</y>
       <width>31</width>
       <height>16</height>
      </rect>
@@ -489,7 +489,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>20</y>
+      <y>40</y>
       <width>61</width>
       <height>20</height>
      </rect>
@@ -507,7 +507,7 @@
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>20</y>
+      <y>40</y>
       <width>31</width>
       <height>20</height>
      </rect>
@@ -527,7 +527,7 @@
     <property name="geometry">
      <rect>
       <x>180</x>
-      <y>20</y>
+      <y>40</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -545,7 +545,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>20</y>
+      <y>40</y>
       <width>31</width>
       <height>20</height>
      </rect>
@@ -630,7 +630,7 @@
      <number>120</number>
     </attribute>
     <attribute name="verticalHeaderDefaultSectionSize">
-     <number>21</number>
+     <number>24</number>
     </attribute>
     <row>
      <property name="text">
@@ -1038,7 +1038,7 @@
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>130</y>
+      <y>150</y>
       <width>31</width>
       <height>16</height>
      </rect>
@@ -1056,7 +1056,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>130</y>
+      <y>150</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -1069,7 +1069,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>130</y>
+      <y>150</y>
       <width>151</width>
       <height>16</height>
      </rect>
@@ -1081,6 +1081,50 @@
     </property>
     <property name="text">
      <string>Injection temperature:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="refresh_button">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>490</y>
+      <width>81</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Refresh</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_32">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>81</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>IP Address:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="ip_address">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>10</y>
+      <width>81</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>127.0.0.1</string>
     </property>
    </widget>
   </widget>
