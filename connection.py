@@ -96,10 +96,23 @@ client.connect()
 # client.write_register(0x9C41, 0x0004)
 # client.write_register(0x9D08, 0x0001)
 
-response = client.read_discrete_inputs(0x2712, 1)
-print(response)
-print(response.bits[0])
+# response = client.read_discrete_inputs(0x2712, 1)
+# print(response)
+# print(response.bits[0])
 
+# This is used for reading an input register
+result = {}
+time = client.read_input_registers(30528, 6)
+result['Years'], result['Months'], result['Days'], result['Hours'], result['Minutes'], result['Seconds'] = time.registers
+print(result)
+print(time.registers)
+
+time = client.read_input_registers(30900, 2)
+print(time.registers)
+
+# for i in range(30500, 31000):
+#     time = client.read_input_registers(i, 1)
+#     print(time, i)
 
 # # This function will start a sequence method
 # client.write_coil(0x044C, 0x01)

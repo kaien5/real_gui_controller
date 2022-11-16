@@ -1,9 +1,3 @@
-# The settings for the Threads
-check1 = True
-check2 = True
-i1 = 0
-i2 = 0
-
 # The standard settings for the HVC and microGC
 standard_hvc_settings = {"ip address": "0.0.0.0", "connection name 1": "Nozzle", "connection name 2": "V2", "connection name 3": "V1",
                          "connection name 4": "Anode", "connection name 5": "V3", "connection name 6": "MCP", "module name 1": "HV06",

@@ -3,6 +3,7 @@ import socket
 import struct
 import pandas as pd
 from os import getcwd
+from datetime import datetime
 
 
 def load(host=None, port=None):
@@ -79,5 +80,10 @@ def load(host=None, port=None):
         filename = getcwd() + '\\Files\\' + str(message_slice[1:-1]) + '.txt'
         df = pd.DataFrame({'Time(s)': time_value, 'Ch1 (FF)': chromatogram1, 'Ch2 (FF)': chromatogram2, 'Ch3 (BF)': chromatogram3})
         df.to_csv(filename, sep='\t', index=False)
+
+        with open(filename, 'r+') as f:
+            old = f.read()
+            f.seek(0)
+            f.write('local time\t' + time_stamp[1:-1] + '\n' + 'UTC time\t' + str(datetime.now()) + '\n' + old)
 
     return filename

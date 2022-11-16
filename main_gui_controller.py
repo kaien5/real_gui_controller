@@ -19,6 +19,10 @@ check = True
 
 class Controller:
     def __init__(self, load=False, data=None):
+        self.wait = None
+        self.client = None
+        self.worker1 = None
+        self.thread1 = None
         self.filename = None
         self.window_in = None
         self.window_GC = None
@@ -77,19 +81,20 @@ class Controller:
             self.Ch2_FF = data[2]
             self.Ch3_BF = data[3]
         else:
-            file_name = os.getcwd() + '/Files/Demo_file.txt'
+            file_name = os.getcwd() + '/Data/Demo_file.txt'
             self.ui.chromatogram1.canvas.fig.suptitle('Demo Data')
             self.ui.chromatogram2.canvas.fig.suptitle('Demo Data')
             self.ui.chromatogram3.canvas.fig.suptitle('Demo Data')
             self.ui.mass_spectrum.canvas.fig.suptitle('Demo Data')
             self.ui.electron_image.canvas.fig.suptitle('Demo Data')
-            self.time = np.loadtxt(file_name, skiprows=1, usecols=0)
-            self.Ch1_FF = np.loadtxt(file_name, skiprows=1, usecols=1)
-            self.Ch2_FF = np.loadtxt(file_name, skiprows=1, usecols=2)
-            self.Ch3_BF = np.loadtxt(file_name, skiprows=1, usecols=3)
+            self.time = np.loadtxt(file_name, skiprows=3, usecols=0)
+            self.Ch1_FF = np.loadtxt(file_name, skiprows=3, usecols=1)
+            self.Ch2_FF = np.loadtxt(file_name, skiprows=3, usecols=2)
+            self.Ch3_BF = np.loadtxt(file_name, skiprows=3, usecols=3)
 
     # Start the data acquisition
     def start(self):
+        global check
         try:
             microGC_ip = self.ui.ip_address_microGC.text()
             self.client = ModbusTcpClient(host=microGC_ip, port='502')
@@ -103,6 +108,7 @@ class Controller:
             self.ui.load_button.setEnabled(False)
 
             self.wait = True
+            check = True
 
             self.thread1 = QThread()
             self.worker1 = Worker1()
@@ -114,7 +120,7 @@ class Controller:
             self.worker1.progress1.connect(self.check_microGC)
             self.thread1.start()
 
-        except Exception:
+        except:
             self.ui.microGC_status.setText('Invalid IP Address')
 
     # This is to check whether the MicroGC is busy
@@ -146,10 +152,10 @@ class Controller:
         self.ui.chromatogram3.canvas.fig.suptitle('Ch3 (BF)')
         self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
         self.ui.electron_image.canvas.fig.suptitle('Electron image')
-        self.time = np.loadtxt(str(self.filename), skiprows=1, usecols=0)
-        self.Ch1_FF = np.loadtxt(str(self.filename), skiprows=1, usecols=1)
-        self.Ch2_FF = np.loadtxt(str(self.filename), skiprows=1, usecols=2)
-        self.Ch3_BF = np.loadtxt(str(self.filename), skiprows=1, usecols=3)
+        self.time = np.loadtxt(str(self.filename), skiprows=3, usecols=0)
+        self.Ch1_FF = np.loadtxt(str(self.filename), skiprows=3, usecols=1)
+        self.Ch2_FF = np.loadtxt(str(self.filename), skiprows=3, usecols=2)
+        self.Ch3_BF = np.loadtxt(str(self.filename), skiprows=3, usecols=3)
 
         if self.ui.enable_plots.isChecked():
             self.ui.enable_plots.toggle()
@@ -229,7 +235,7 @@ class Controller:
                 self.ui.mass_spectrum.canvas.ax.clear()
 
                 # Selecting the TOF file based on which location of the plot has been clicked
-                with h5py.File('Files/scan_example.h5', 'r') as f:
+                with h5py.File('Data/scan_example.h5', 'r') as f:
                     tof_list = list(f.keys())[0]
 
                     # Creating a list for the files in TOF
@@ -243,7 +249,7 @@ class Controller:
                     self.ui.mass_spectrum.canvas.draw()
 
                 # Selecting the electron image based on which location of the plot has been clicked
-                with h5py.File('Files/example.h5', 'r') as f:
+                with h5py.File('Data/example.h5', 'r') as f:
                     picture_nr = round(abs(round(ix)) / max(self.time) * 9)
                     electron_list = list(f.keys())[0]
                     electron_images = f[electron_list][()]
@@ -283,6 +289,7 @@ class Worker1(QObject):
         while check:
             self.progress1.emit(1)
             sleep(2)
+            print('checking')
         self.finished1.emit()
 
 # class Worker2(QObject):
