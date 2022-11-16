@@ -83,8 +83,12 @@
 #     plt.show()
 
 """This is working for communication through modbus"""
+import struct
+
 import pymodbus.bit_read_message
 from pymodbus.client.sync import ModbusTcpClient
+from pymodbus.payload import BinaryPayloadDecoder
+from pymodbus.constants import Endian
 
 IP = '127.0.0.1'
 PORT = '502'
@@ -104,11 +108,33 @@ client.connect()
 result = {}
 time = client.read_input_registers(30528, 6)
 result['Years'], result['Months'], result['Days'], result['Hours'], result['Minutes'], result['Seconds'] = time.registers
-print(result)
-print(time.registers)
+# print(result)
+# print(time.registers)
 
-time = client.read_input_registers(30900, 2)
-print(time.registers)
+test = {}
+time = client.read_input_registers(31401, 1)
+number_of_sequences = time.registers[0]
+
+# sequence_name = client.read_input_registers(31602, 20)
+# print(sequence_name.registers)
+# decoder = BinaryPayloadDecoder.fromRegisters(sequence_name.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+# decoded = {'name': decoder.decode_string(20).decode()}
+# print(decoded['name'])
+#
+# sequence_names = {}
+# for i in range(number_of_sequences):
+#     register = client.read_input_registers(31602 + (i * 10), 20)
+#     decoder = BinaryPayloadDecoder.fromRegisters(register.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+#     # decoded = {'name': decoder.decode_string(20).decode()}
+#     sequence_names['Sequence ' + str(i)] = decoder.decode_string(20).decode()
+# print(sequence_names)
+# print(sequence_names['Sequence 1'])
+
+register = client.read_input_registers(30702, 2)
+raw = struct.pack('>HH', register.registers[0], register.registers[1])
+print(struct.unpack('>f', raw)[0])  # This will print the float value of register 30702
+
+# sequence_name = client.read_input_registers(31402, number_of_sequences)
 
 # for i in range(30500, 31000):
 #     time = client.read_input_registers(i, 1)

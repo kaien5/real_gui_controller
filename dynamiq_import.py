@@ -77,7 +77,7 @@ def load(host=None, port=None):
             for t in range(len(chromatogram1)):
                 time_value.append(t / 100)
 
-        filename = getcwd() + '\\Files\\' + str(message_slice[1:-1]) + '.txt'
+        filename = getcwd() + '\\Data\\' + str(message_slice[1:-1]) + '.txt'
         df = pd.DataFrame({'Time(s)': time_value, 'Ch1 (FF)': chromatogram1, 'Ch2 (FF)': chromatogram2, 'Ch3 (BF)': chromatogram3})
         df.to_csv(filename, sep='\t', index=False)
 

@@ -1,6 +1,9 @@
 import os
 import h5py
 import numpy as np
+from pymodbus.constants import Endian
+from pymodbus.payload import BinaryPayloadDecoder
+
 import file_browser
 import dynamiq_import
 import hvc_controller
@@ -28,6 +31,7 @@ class Controller:
         self.window_GC = None
         self.window_hvc = None
         self.window_motor = None
+        self.sequence_names = None
         self.fileBrowserWidget = None
         self.MainWindow = QtWidgets.QMainWindow()
         self.ui = Ui_MainWindow()
@@ -40,14 +44,15 @@ class Controller:
         # The buttons and their functions
         self.ui.injector_settings_button.clicked.connect(self.open_injector_window)
         self.ui.microGC_settings_button.clicked.connect(self.open_micro_gc_window)
-        self.ui.hvc_settings_button.clicked.connect(self.open_hvc_window)
+        self.ui.sequence_number.valueChanged.connect(self.sequence_selection)
         self.ui.motor_settings_button.clicked.connect(self.open_motor_window)
+        self.ui.hvc_settings_button.clicked.connect(self.open_hvc_window)
         self.ui.action_Open.triggered.connect(self.open_file)
-
-        # # The buttons and their functions
-        self.ui.start_button.clicked.connect(self.start)
+        self.ui.refresh_button.clicked.connect(self.refresh)
         self.ui.load_button.clicked.connect(self.load_data)
+        self.ui.start_button.clicked.connect(self.start)
         self.ui.enable_plots.toggled.connect(self.plots)
+        self.ui.stop_button.clicked.connect(self.stop)
 
         # The chromatogram and mass spectrum settings
         self.ui.chromatogram1.canvas.fig.suptitle('Ch1 (FF)')
@@ -92,6 +97,9 @@ class Controller:
             self.Ch2_FF = np.loadtxt(file_name, skiprows=3, usecols=2)
             self.Ch3_BF = np.loadtxt(file_name, skiprows=3, usecols=3)
 
+    def sequence_selection(self):
+        self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
+
     # Start the data acquisition
     def start(self):
         global check
@@ -102,8 +110,9 @@ class Controller:
 
             # This function will select the sequence to run and start as well
             self.client.write_register(0x9D0A, 0x0001)  # Stop all queued sequences
-            self.client.write_register(0x9C41, 0x0004)  # Selected sequence = 4
+            self.client.write_register(0x9C41, self.ui.sequence_number.value())
             self.client.write_register(0x9D08, 0x0001)
+            self.ui.refresh_button.setEnabled(False)
             self.ui.start_button.setEnabled(False)
             self.ui.load_button.setEnabled(False)
 
@@ -123,6 +132,45 @@ class Controller:
         except:
             self.ui.microGC_status.setText('Invalid IP Address')
 
+    def stop(self):
+        global check
+        self.client.write_register(0x9D0A, 1)
+        self.client.close()
+        self.ui.refresh_button.setEnabled(False)
+        self.ui.refresh_button.setEnabled(True)
+        self.ui.start_button.setEnabled(True)
+        self.ui.stop_button.setEnabled(False)
+        check = False
+        self.ui.microGC_status.setText('Run cancelled')
+
+    def refresh(self):
+        try:
+            microGC_ip = self.ui.ip_address_microGC.text()
+            self.client = ModbusTcpClient(host=microGC_ip, port='502')
+            self.client.connect()
+            self.ui.microGC_status.setText('Connected')
+
+            number_of_sequences = self.client.read_input_registers(31401, 1).registers[0]  # The number of sequences on instrument
+            self.ui.sequence_number.setMaximum(number_of_sequences)  # Setting the sequence number value to the amount of sequences
+
+            self.sequence_names = {}
+            for i in range(number_of_sequences):
+                register = self.client.read_input_registers(31602 + (i * 10), 20)
+                decoder = BinaryPayloadDecoder.fromRegisters(register.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+                self.sequence_names['Sequence ' + str(i + 1)] = decoder.decode_string(20).decode()
+
+            self.client.close()
+            self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
+
+            if self.ui.start_button.isEnabled() is False:
+                self.ui.start_button.setEnabled(True)
+
+            if self.ui.sequence_number.isEnabled() is False:
+                self.ui.sequence_number.setEnabled(True)
+
+        except:
+            self.ui.microGC_status.setText('Invalid IP Address')
+
     # This is to check whether the MicroGC is busy
     def check_microGC(self):
         global check
@@ -135,10 +183,14 @@ class Controller:
 
         else:
             response = self.client.read_discrete_inputs(0x2712, 1)
+            progress = self.client.read_input_registers(30542, 1)
             if response.bits[0]:
-                self.ui.microGC_status.setText('Running')
+                self.ui.microGC_status.setText(f'Running {progress.registers[0]}%')
+                self.ui.stop_button.setEnabled(True)
             else:
                 self.ui.microGC_status.setText('Done')
+                self.ui.refresh_button.setEnabled(True)
+                self.ui.stop_button.setEnabled(False)
                 self.ui.start_button.setEnabled(True)
                 self.ui.load_button.setEnabled(True)
                 check = False
@@ -289,7 +341,6 @@ class Worker1(QObject):
         while check:
             self.progress1.emit(1)
             sleep(2)
-            print('checking')
         self.finished1.emit()
 
 # class Worker2(QObject):
