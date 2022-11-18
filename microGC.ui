@@ -345,7 +345,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Test</string>
+      <string/>
      </property>
     </widget>
    </widget>
@@ -433,7 +433,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>75.0</string>
+     <string>0</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="column_pressure">
@@ -446,7 +446,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>1023.4</string>
+     <string>0</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_16">
@@ -1062,7 +1062,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>250.0</string>
+     <string>0</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_21">
@@ -1125,6 +1125,40 @@
     </property>
     <property name="text">
      <string>127.0.0.1</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="channel_number">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>490</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>4</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_33">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>490</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Channel nr.:</string>
     </property>
    </widget>
   </widget>

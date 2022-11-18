@@ -105,15 +105,15 @@ client.connect()
 # print(response.bits[0])
 
 # This is used for reading an input register
-result = {}
-time = client.read_input_registers(30528, 6)
-result['Years'], result['Months'], result['Days'], result['Hours'], result['Minutes'], result['Seconds'] = time.registers
-# print(result)
-# print(time.registers)
-
-test = {}
-time = client.read_input_registers(31401, 1)
-number_of_sequences = time.registers[0]
+# result = {}
+# time = client.read_input_registers(30528, 6)
+# result['Years'], result['Months'], result['Days'], result['Hours'], result['Minutes'], result['Seconds'] = time.registers
+# # print(result)
+# # print(time.registers)
+#
+# test = {}
+# time = client.read_input_registers(31401, 1)
+# number_of_sequences = time.registers[0]
 
 # sequence_name = client.read_input_registers(31602, 20)
 # print(sequence_name.registers)
@@ -129,9 +129,18 @@ number_of_sequences = time.registers[0]
 #     sequence_names['Sequence ' + str(i)] = decoder.decode_string(20).decode()
 # print(sequence_names)
 # print(sequence_names['Sequence 1'])
-register = client.read_input_registers(30702, 2)
-raw = struct.pack('>HH', register.registers[0], register.registers[1])
-print(struct.unpack('>f', raw)[0])  # This will print the float value of register 30702
+# register = client.read_input_registers(30702, 2)
+# raw = struct.pack('>HH', register.registers[0], register.registers[1])
+# print(struct.unpack('>f', raw)[0])  # This will print the float value of register 30702
+
+registers = [30530, 30531, 30532, 30533]
+
+for i in registers:
+    register = client.read_input_registers(i, 1)
+    print(register.registers[0])
+    # raw = struct.unpack('>I', register.registers[0])
+    # print(raw)
+
 
 # sequence_name = client.read_input_registers(31402, number_of_sequences)
 

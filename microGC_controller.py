@@ -63,23 +63,32 @@ class MicroGcController:
             self.ui_GC.temperature_table.setItem(i, 1, QTableWidgetItem(microGC_settings["Final temp"][i]))
             self.ui_GC.temperature_table.setItem(i, 2, QTableWidgetItem(microGC_settings["Hold time"][i]))
 
+        self.refresh()
+
     def refresh(self):
         try:
             microGC_ip = self.ui_GC.ip_address.text()
             self.client = ModbusTcpClient(host=microGC_ip, port='502')
             self.client.connect()
 
-            test = [30900, 30916, 30908, 30700]  # 30700 might be wrong
+            channel_number = self.ui_GC.channel_number.value()
+            float_registers = [30540, 30700, 30900, 30908, 30916]  # 30700 might be wrong
             data = {}
-            for i in test:
-                register = self.client.read_input_registers(i, 2)
-                raw = struct.pack('>HH', register.registers[0], register.registers[1])
-                data['Register ' + str(i)] = str(struct.unpack('>f', raw)[0])
 
-            self.ui_GC.column_oven_temp.setText(str(data['Register 30900']))
-            self.ui_GC.column_pressure.setText(str(data['Register 30916']))
-            self.ui_GC.injection_temp.setText(str(data['Register 30908']))
-            self.ui_GC.heated_sample_line_temp.setText(str(data['Register 30700']))
+            for i in float_registers:
+                if i == 30900 or i == 30908 or i == 30916:
+                    register = self.client.read_input_registers(i + ((channel_number - 1) * 2), 2)
+                else:
+                    register = self.client.read_input_registers(i, 2)
+
+                raw = struct.pack('>HH', register.registers[0], register.registers[1])
+                data['Register ' + str(i)] = str(round(struct.unpack('>f', raw)[0], 1))
+
+            self.ui_GC.analysis_time.setText(data['Register 30540'])
+            self.ui_GC.heated_sample_line_temp.setText(data['Register 30700'])
+            self.ui_GC.column_oven_temp.setText(data['Register 30900'])
+            self.ui_GC.injection_temp.setText(data['Register 30908'])
+            self.ui_GC.column_pressure.setText(data['Register 30916'])
 
             self.client.close()
 
