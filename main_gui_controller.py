@@ -1,19 +1,24 @@
 import os
-import h5py
-import numpy as np
-from pymodbus.constants import Endian
-from pymodbus.payload import BinaryPayloadDecoder
+import struct
+
+from matplotlib import pyplot as plt
+from matplotlib.widgets import RectangleSelector
 
 import file_browser
 import dynamiq_import
 import hvc_controller
 import motor_controller
+import h5py
+import numpy as np
 
 from time import sleep
 from PyQt5 import QtWidgets
 from main_gui import Ui_MainWindow
+from pymodbus.constants import Endian
+from PyQt5.QtWidgets import QHeaderView
 from pymodbus.client.sync import ModbusTcpClient
 from microGC_controller import MicroGcController
+from pymodbus.payload import BinaryPayloadDecoder
 from injector_controller import Injector_controller
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
@@ -24,6 +29,7 @@ class Controller:
     def __init__(self, load=False, data=None):
         self.wait = None
         self.client = None
+        self.loaded = False
         self.worker1 = None
         self.thread1 = None
         self.filename = None
@@ -148,6 +154,7 @@ class Controller:
             microGC_ip = self.ui.ip_address_microGC.text()
             self.client = ModbusTcpClient(host=microGC_ip, port='502')
             self.client.connect()
+
             self.ui.microGC_status.setText('Connected')
 
             number_of_sequences = self.client.read_input_registers(31401, 1).registers[0]  # The number of sequences on instrument
@@ -157,19 +164,19 @@ class Controller:
             for i in range(number_of_sequences):
                 register = self.client.read_input_registers(31602 + (i * 10), 20)
                 decoder = BinaryPayloadDecoder.fromRegisters(register.registers, byteorder=Endian.Big, wordorder=Endian.Big)
-                self.sequence_names['Sequence ' + str(i + 1)] = decoder.decode_string(20).decode()
+                self.sequence_names['Sequence ' + str(i + 1)] = decoder.decode_string(20).decode().replace('\x00', '')
 
             self.client.close()
+            self.ui.sequence_number.setValue(4)
             self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
 
-            if self.ui.start_button.isEnabled() is False:
-                self.ui.start_button.setEnabled(True)
-
-            if self.ui.sequence_number.isEnabled() is False:
-                self.ui.sequence_number.setEnabled(True)
+            # Enabling some buttons
+            self.ui.start_button.setEnabled(True)
+            self.ui.sequence_number.setEnabled(True)
+            self.ui.load_button.setEnabled(True)
 
         except:
-            self.ui.microGC_status.setText('Invalid IP Address')
+            self.ui.microGC_status.setText('No connection possible')
 
     # This is to check whether the MicroGC is busy
     def check_microGC(self):
@@ -197,61 +204,151 @@ class Controller:
             self.client.close()
 
     def load_data(self):
+        # Communicating to the plot function
+        self.loaded = True
+
+        # Connect to the IP written in the text line
         microGC_ip = self.ui.ip_address_microGC.text()
         self.filename = dynamiq_import.load(host=microGC_ip, port=7197)
+
+        # Importing the method name
+        register = self.client.read_input_registers(32000, 10)
+        decoder = BinaryPayloadDecoder.fromRegisters(register.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+        last_method = str(decoder.decode_string(20).decode()).replace('\x00', '')
+        self.ui.last_method.setText(last_method)
+
+        # The compounds found in the last run
+        # The vertical headers
+        self.compound_data = {}
+        number_of_compounds = self.client.read_input_registers(35000, 1).registers[0]
+
+        # Extracting the compound data from the DynamicQ
+        for i in range(number_of_compounds):
+            register = self.client.read_input_registers(35001 + i * 10, 10)
+            decoder = BinaryPayloadDecoder.fromRegisters(register.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+            compounds = decoder.decode_string(20).decode().replace('\x00', '')
+
+            # The contents for the table
+            values = []
+            for _ in range(7):
+                register = self.client.read_input_registers(35401 + i * 2 + _ * 80, 2)
+                concentration = str(round(struct.unpack('>f', struct.pack('>HH', register.registers[0], register.registers[1]))[0], 2))
+                values.append(concentration)
+
+            channel_number = self.client.read_input_registers(36121 + i, 1).registers[0]
+            values.append(str(channel_number))
+
+            self.compound_data[compounds] = values
+
+        # Loading the compound names
+        self.compound_names = []
+        for index, key in enumerate(self.compound_data):
+            self.compound_names.append(key)
+
+        column_names = ['Concentration [mol%]', 'Retention time [sec]', 'Peak area [mV×sec]', 'Peak height [mV]', 'Peak width [sec]',
+                        'Integration start [sec]', 'Integration end [sec]', 'Channel number [Ch]']
+
+        # The horizontal headers
+        for i in range(len(column_names)):
+            if self.ui.chromatogram_table.columnCount() < len(column_names):
+                self.ui.chromatogram_table.insertColumn(i)
+            self.ui.chromatogram_table.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(column_names[i]))
+
+        # The vertical headers
+        for i in range(number_of_compounds):
+            if self.ui.chromatogram_table.rowCount() < number_of_compounds:
+                self.ui.chromatogram_table.insertRow(i)
+            self.ui.chromatogram_table.setVerticalHeaderItem(i, QtWidgets.QTableWidgetItem(self.compound_names[i]))
+
+        # The table contents
+        for i in range(number_of_compounds):
+            for _ in range(len(column_names)):
+                self.ui.chromatogram_table.setItem(i, _, QtWidgets.QTableWidgetItem(self.compound_data[self.compound_names[i]][_]))
+
+        # Resizing the columns and rows to their contents
+        self.ui.chromatogram_table.resizeColumnsToContents()
+        self.ui.chromatogram_table.resizeRowsToContents()
+
+        # The brackets for the compounds in the plots
+        self.brackets = {}
+        for i in range(len(self.compound_names)):
+            if float(self.compound_data[self.compound_names[i]][5]) > 0:
+                x1 = [float(self.compound_data[self.compound_names[i]][5]), float(self.compound_data[self.compound_names[i]][5])]
+                x2 = [float(self.compound_data[self.compound_names[i]][6]), float(self.compound_data[self.compound_names[i]][6])]
+                y = [-5, 100]
+                begin = x1, y
+                end = x2, y
+                self.brackets[self.compound_names[i]] = begin, end
+
+        # Changing titles of the plots
         self.ui.chromatogram1.canvas.fig.suptitle('Ch1 (FF)')
         self.ui.chromatogram2.canvas.fig.suptitle('Ch2 (FF)')
         self.ui.chromatogram3.canvas.fig.suptitle('Ch3 (BF)')
         self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
         self.ui.electron_image.canvas.fig.suptitle('Electron image')
+
+        # The data for the plots
         self.time = np.loadtxt(str(self.filename), skiprows=3, usecols=0)
         self.Ch1_FF = np.loadtxt(str(self.filename), skiprows=3, usecols=1)
         self.Ch2_FF = np.loadtxt(str(self.filename), skiprows=3, usecols=2)
         self.Ch3_BF = np.loadtxt(str(self.filename), skiprows=3, usecols=3)
 
+        # Refreshing the plots
         if self.ui.enable_plots.isChecked():
             self.ui.enable_plots.toggle()
             self.ui.enable_plots.toggle()
-
-        if self.ui.enable_plots.isChecked() is False:
+        else:
             self.ui.enable_plots.toggle()
 
-    def plots(self):
+        # Closing the connection to the client
+        self.client.close()
+
+    def plots(self, draw=True):
         # Based on the checkbox, the plots will be enabled or disabled
         if self.ui.enable_plots.checkState():
-            if self.ui.chromatogram1.isEnabled() is False:
-                self.ui.chromatogram1.setEnabled(True)
-            if self.ui.chromatogram2.isEnabled() is False:
-                self.ui.chromatogram2.setEnabled(True)
-            if self.ui.chromatogram3.isEnabled() is False:
-                self.ui.chromatogram3.setEnabled(True)
-            if self.ui.mass_spectrum.isEnabled() is False:
-                self.ui.mass_spectrum.setEnabled(True)
-            if self.ui.electron_image.isEnabled() is False:
-                self.ui.electron_image.setEnabled(True)
+            self.ui.chromatogram1.setEnabled(True)
+            self.ui.chromatogram2.setEnabled(True)
+            self.ui.chromatogram3.setEnabled(True)
+            self.ui.mass_spectrum.setEnabled(True)
+            self.ui.electron_image.setEnabled(True)
 
-            # Plotting the chromatograms
+            # Clearing the plots
             self.ui.chromatogram1.canvas.ax.clear()
             self.ui.chromatogram2.canvas.ax.clear()
             self.ui.chromatogram3.canvas.ax.clear()
-            self.ui.chromatogram1.canvas.ax.plot(self.time, self.Ch1_FF)
-            self.ui.chromatogram2.canvas.ax.plot(self.time, self.Ch2_FF)
-            self.ui.chromatogram3.canvas.ax.plot(self.time, self.Ch3_BF)
-            self.ui.chromatogram1.canvas.draw()
-            self.ui.chromatogram2.canvas.draw()
-            self.ui.chromatogram3.canvas.draw()
+            self.ui.mass_spectrum.canvas.ax.clear()
+            self.ui.electron_image.canvas.ax.clear()
+
+            # Plotting the data and brackets
+            self.ui.chromatogram1.canvas.ax.plot(self.time, self.Ch1_FF, 'b')
+            self.ui.chromatogram2.canvas.ax.plot(self.time, self.Ch2_FF, 'b')
+            self.ui.chromatogram3.canvas.ax.plot(self.time, self.Ch3_BF, 'b')
+
+            if self.loaded:
+                for i in range(len(self.compound_names)):
+                    if int(self.compound_data[self.compound_names[i]][-1]) == 1:
+                        self.ui.chromatogram1.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0], self.brackets[self.compound_names[i]][0][1], 'k', linestyle='dotted')
+                        self.ui.chromatogram1.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0], self.brackets[self.compound_names[i]][1][1], 'r', linestyle='dotted')
+
+                    elif int(self.compound_data[self.compound_names[i]][-1]) == 2:
+                        if float(self.compound_data[self.compound_names[i]][5]) > 0:
+                            self.ui.chromatogram2.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0], self.brackets[self.compound_names[i]][0][1], 'k', linestyle='dotted')
+                            self.ui.chromatogram2.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0], self.brackets[self.compound_names[i]][1][1], 'r', linestyle='dotted')
+
+            if draw:
+                # Showing the plots
+                self.ui.chromatogram1.canvas.draw()
+                self.ui.chromatogram2.canvas.draw()
+                self.ui.chromatogram3.canvas.draw()
+                self.ui.mass_spectrum.canvas.draw()
+                self.ui.electron_image.canvas.draw()
 
         else:
-            if self.ui.chromatogram1.isEnabled():
-                self.ui.chromatogram1.setEnabled(False)
-            if self.ui.chromatogram2.isEnabled():
-                self.ui.chromatogram2.setEnabled(False)
-            if self.ui.chromatogram3.isEnabled():
-                self.ui.chromatogram3.setEnabled(False)
-            if self.ui.mass_spectrum.isEnabled():
-                self.ui.mass_spectrum.setEnabled(False)
-            if self.ui.electron_image.isEnabled():
-                self.ui.electron_image.setEnabled(False)
+            self.ui.chromatogram1.setEnabled(False)
+            self.ui.chromatogram2.setEnabled(False)
+            self.ui.chromatogram3.setEnabled(False)
+            self.ui.mass_spectrum.setEnabled(False)
+            self.ui.electron_image.setEnabled(False)
 
             # Clearing plots and redrawing them
             self.ui.chromatogram1.canvas.ax.clear()
@@ -272,15 +369,12 @@ class Controller:
                 ix = round(float(event.xdata), 2)  # Location of the plot click
                 index = np.where(self.time == ix)[0][0]  # Index location on where the line_x should appear
                 line_x = self.time[index]
-                self.ui.chromatogram1.canvas.ax.clear()
-                self.ui.chromatogram2.canvas.ax.clear()
-                self.ui.chromatogram3.canvas.ax.clear()
-                self.ui.chromatogram1.canvas.ax.plot(self.time, self.Ch1_FF)
-                self.ui.chromatogram2.canvas.ax.plot(self.time, self.Ch2_FF)
-                self.ui.chromatogram3.canvas.ax.plot(self.time, self.Ch3_BF)
-                self.ui.chromatogram1.canvas.ax.plot([line_x, line_x], [min(self.Ch1_FF), max(self.Ch1_FF)])
-                self.ui.chromatogram2.canvas.ax.plot([line_x, line_x], [min(self.Ch2_FF), max(self.Ch2_FF)])
-                self.ui.chromatogram3.canvas.ax.plot([line_x, line_x], [min(self.Ch3_BF), max(self.Ch3_BF)])
+
+                self.plots(draw=False)
+                self.ui.chromatogram1.canvas.ax.plot([line_x, line_x], [min(self.Ch1_FF), max(self.Ch1_FF)], 'y')
+                self.ui.chromatogram2.canvas.ax.plot([line_x, line_x], [min(self.Ch2_FF), max(self.Ch2_FF)], 'y')
+                self.ui.chromatogram3.canvas.ax.plot([line_x, line_x], [min(self.Ch3_BF), max(self.Ch3_BF)], 'y')
+
                 self.ui.chromatogram1.canvas.draw()
                 self.ui.chromatogram2.canvas.draw()
                 self.ui.chromatogram3.canvas.draw()
@@ -340,7 +434,7 @@ class Worker1(QObject):
     def run(self):
         while check:
             self.progress1.emit(1)
-            sleep(2)
+            sleep(1)
         self.finished1.emit()
 
 # class Worker2(QObject):

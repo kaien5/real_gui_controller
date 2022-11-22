@@ -133,13 +133,31 @@ client.connect()
 # raw = struct.pack('>HH', register.registers[0], register.registers[1])
 # print(struct.unpack('>f', raw)[0])  # This will print the float value of register 30702
 
-registers = [30530, 30531, 30532, 30533]
+# registers = [30530, 30531, 30532, 30533]
+#
+# for i in registers:
+#     register = client.read_input_registers(i, 1)
+#     print(register.registers[0])
+#     raw = struct.unpack('>I', register.registers[0])
+#     print(raw)
+print(range(10))
 
-for i in registers:
-    register = client.read_input_registers(i, 1)
-    print(register.registers[0])
-    # raw = struct.unpack('>I', register.registers[0])
-    # print(raw)
+data = {}
+number_of_compounds = client.read_input_registers(35000, 1).registers[0]
+
+for i in range(number_of_compounds):
+    register = client.read_input_registers(35001 + i * 10, 10)
+    decoder = BinaryPayloadDecoder.fromRegisters(register.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+
+    values = []
+
+    for _ in range(7):
+        register = client.read_input_registers(35401 + i * 2 + _ * 80, 2)
+        concentration = str(round(struct.unpack('>f', struct.pack('>HH', register.registers[0], register.registers[1]))[0], 2))
+        values.append(concentration)
+    data[decoder.decode_string(20).decode().replace('\x00', '')] = values
+
+print(data)
 
 
 # sequence_name = client.read_input_registers(31402, number_of_sequences)
