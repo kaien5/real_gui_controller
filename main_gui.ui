@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1908</width>
-    <height>988</height>
+    <width>1896</width>
+    <height>1084</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -430,32 +430,6 @@
      </property>
     </widget>
    </widget>
-   <widget class="MplWidget" name="mass_spectrum">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>410</y>
-      <width>811</width>
-      <height>581</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="MplWidget" name="electron_image">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>1100</x>
-      <y>410</y>
-      <width>801</width>
-      <height>581</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
@@ -466,13 +440,13 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>1</number>
     </property>
-    <widget class="QWidget" name="tab">
+    <widget class="QWidget" name="Ch1_FF_tab">
      <attribute name="title">
       <string>Ch1 (FF)</string>
      </attribute>
-     <widget class="MplWidget" name="chromatogram1">
+     <widget class="MplWidget" name="ch1_FF">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -486,11 +460,11 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_2">
+    <widget class="QWidget" name="Ch2_FF_tab">
      <attribute name="title">
       <string>Ch2 (FF)</string>
      </attribute>
-     <widget class="MplWidget" name="chromatogram2">
+     <widget class="MplWidget" name="ch2_FF">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -504,11 +478,11 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="widget">
+    <widget class="QWidget" name="Ch2_BF_tab">
      <attribute name="title">
-      <string>Ch3 (BF)</string>
+      <string>Ch2 (BF)</string>
      </attribute>
-     <widget class="MplWidget" name="chromatogram3">
+     <widget class="MplWidget" name="ch2_BF">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -519,30 +493,6 @@
         <width>1591</width>
         <height>381</height>
        </rect>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_3">
-     <attribute name="title">
-      <string>Table</string>
-     </attribute>
-     <widget class="QTableWidget" name="chromatogram_table">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>1571</width>
-        <height>351</height>
-       </rect>
-      </property>
-      <property name="autoFillBackground">
-       <bool>true</bool>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-      <property name="textElideMode">
-       <enum>Qt::ElideNone</enum>
       </property>
      </widget>
     </widget>
@@ -570,13 +520,81 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QTabWidget" name="tabWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>410</y>
+      <width>1591</width>
+      <height>581</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab_4">
+     <attribute name="title">
+      <string>TOF spectrum and electron image</string>
+     </attribute>
+     <widget class="MplWidget" name="electron_image">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>820</x>
+        <y>0</y>
+        <width>771</width>
+        <height>581</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="MplWidget" name="mass_spectrum">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>-10</x>
+        <y>0</y>
+        <width>831</width>
+        <height>581</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Table_tab">
+     <attribute name="title">
+      <string>Table</string>
+     </attribute>
+     <widget class="QTableWidget" name="chromatogram_table">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>10</y>
+        <width>1241</width>
+        <height>531</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1908</width>
+     <width>1896</width>
      <height>21</height>
     </rect>
    </property>

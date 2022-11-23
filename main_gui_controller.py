@@ -1,21 +1,16 @@
 import os
+import h5py
 import struct
-
-from matplotlib import pyplot as plt
-from matplotlib.widgets import RectangleSelector
-
+import numpy as np
 import file_browser
 import dynamiq_import
 import hvc_controller
 import motor_controller
-import h5py
-import numpy as np
 
 from time import sleep
 from PyQt5 import QtWidgets
 from main_gui import Ui_MainWindow
 from pymodbus.constants import Endian
-from PyQt5.QtWidgets import QHeaderView
 from pymodbus.client.sync import ModbusTcpClient
 from microGC_controller import MicroGcController
 from pymodbus.payload import BinaryPayloadDecoder
@@ -60,28 +55,31 @@ class Controller:
         self.ui.enable_plots.toggled.connect(self.plots)
         self.ui.stop_button.clicked.connect(self.stop)
 
+        # Clicked on functions
+        self.ui.ch1_FF.canvas.mpl_connect('button_press_event', self.plot_click)
+        self.ui.ch2_FF.canvas.mpl_connect('button_press_event', self.plot_click)
+        self.ui.ch2_BF.canvas.mpl_connect('button_press_event', self.plot_click)
+        self.ui.chromatogram_table.clicked.connect(self.table_click)
+
         # The chromatogram and mass spectrum settings
-        self.ui.chromatogram1.canvas.fig.suptitle('Ch1 (FF)')
-        self.ui.chromatogram2.canvas.fig.suptitle('Ch2 (FF)')
-        self.ui.chromatogram3.canvas.fig.suptitle('Ch3 (BF)')
+        self.ui.ch1_FF.canvas.fig.suptitle('Ch1 (FF)')
+        self.ui.ch2_FF.canvas.fig.suptitle('Ch2 (FF)')
+        self.ui.ch2_BF.canvas.fig.suptitle('Ch2 (BF)')
         self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
         self.ui.electron_image.canvas.fig.suptitle('Electron image')
-        self.ui.chromatogram1.canvas.mpl_connect('button_press_event', self.on_click)
-        self.ui.chromatogram2.canvas.mpl_connect('button_press_event', self.on_click)
-        self.ui.chromatogram3.canvas.mpl_connect('button_press_event', self.on_click)
-        self.ui.chromatogram1.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
-        self.ui.chromatogram1.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
-        self.ui.chromatogram2.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
-        self.ui.chromatogram2.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
-        self.ui.chromatogram3.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
-        self.ui.chromatogram3.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
+        self.ui.ch1_FF.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
+        self.ui.ch1_FF.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
+        self.ui.ch2_FF.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
+        self.ui.ch2_FF.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
+        self.ui.ch2_BF.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
+        self.ui.ch2_BF.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
         self.ui.mass_spectrum.canvas.fig.text(0.85, 0.05, 'Index nr.', ha='center', va='center')
         self.ui.mass_spectrum.canvas.fig.text(0.05, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
 
         # Disabling the plots at start up
-        self.ui.chromatogram1.setEnabled(False)
-        self.ui.chromatogram2.setEnabled(False)
-        self.ui.chromatogram3.setEnabled(False)
+        self.ui.ch1_FF.setEnabled(False)
+        self.ui.ch2_FF.setEnabled(False)
+        self.ui.ch2_BF.setEnabled(False)
         self.ui.mass_spectrum.setEnabled(False)
         self.ui.electron_image.setEnabled(False)
 
@@ -90,18 +88,18 @@ class Controller:
             self.time = data[0]
             self.Ch1_FF = data[1]
             self.Ch2_FF = data[2]
-            self.Ch3_BF = data[3]
+            self.Ch2_BF = data[3]
         else:
             file_name = os.getcwd() + '/Data/Demo_file.txt'
-            self.ui.chromatogram1.canvas.fig.suptitle('Demo Data')
-            self.ui.chromatogram2.canvas.fig.suptitle('Demo Data')
-            self.ui.chromatogram3.canvas.fig.suptitle('Demo Data')
+            self.ui.ch1_FF.canvas.fig.suptitle('Demo Data')
+            self.ui.ch2_FF.canvas.fig.suptitle('Demo Data')
+            self.ui.ch2_BF.canvas.fig.suptitle('Demo Data')
             self.ui.mass_spectrum.canvas.fig.suptitle('Demo Data')
             self.ui.electron_image.canvas.fig.suptitle('Demo Data')
             self.time = np.loadtxt(file_name, skiprows=3, usecols=0)
             self.Ch1_FF = np.loadtxt(file_name, skiprows=3, usecols=1)
             self.Ch2_FF = np.loadtxt(file_name, skiprows=3, usecols=2)
-            self.Ch3_BF = np.loadtxt(file_name, skiprows=3, usecols=3)
+            self.Ch2_BF = np.loadtxt(file_name, skiprows=3, usecols=3)
 
     def sequence_selection(self):
         self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
@@ -217,8 +215,7 @@ class Controller:
         last_method = str(decoder.decode_string(20).decode()).replace('\x00', '')
         self.ui.last_method.setText(last_method)
 
-        # The compounds found in the last run
-        # The vertical headers
+        # The number of compounds found in the last run
         self.compound_data = {}
         number_of_compounds = self.client.read_input_registers(35000, 1).registers[0]
 
@@ -235,8 +232,9 @@ class Controller:
                 concentration = str(round(struct.unpack('>f', struct.pack('>HH', register.registers[0], register.registers[1]))[0], 2))
                 values.append(concentration)
 
-            channel_number = self.client.read_input_registers(36121 + i, 1).registers[0]
-            values.append(str(channel_number))
+            for _ in range(2):
+                channel_number = self.client.read_input_registers(36121 + i + _ * 40, 1).registers[0]
+                values.append(str(channel_number))
 
             self.compound_data[compounds] = values
 
@@ -246,13 +244,13 @@ class Controller:
             self.compound_names.append(key)
 
         column_names = ['Concentration [mol%]', 'Retention time [sec]', 'Peak area [mV×sec]', 'Peak height [mV]', 'Peak width [sec]',
-                        'Integration start [sec]', 'Integration end [sec]', 'Channel number [Ch]']
+                        'Integration start [sec]', 'Integration end [sec]', 'Channel number [Ch]', 'Detector']
 
         # The horizontal headers
         for i in range(len(column_names)):
             if self.ui.chromatogram_table.columnCount() < len(column_names):
                 self.ui.chromatogram_table.insertColumn(i)
-            self.ui.chromatogram_table.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(column_names[i]))
+                self.ui.chromatogram_table.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(column_names[i]))
 
         # The vertical headers
         for i in range(number_of_compounds):
@@ -263,7 +261,14 @@ class Controller:
         # The table contents
         for i in range(number_of_compounds):
             for _ in range(len(column_names)):
-                self.ui.chromatogram_table.setItem(i, _, QtWidgets.QTableWidgetItem(self.compound_data[self.compound_names[i]][_]))
+                if _ == 8:
+                    if int(self.compound_data[self.compound_names[i]][_]) == 1:
+                        self.ui.chromatogram_table.setItem(i, _, QtWidgets.QTableWidgetItem('FF'))
+                    elif int(self.compound_data[self.compound_names[i]][_]) == 2:
+                        self.ui.chromatogram_table.setItem(i, _, QtWidgets.QTableWidgetItem('BF'))
+
+                else:
+                    self.ui.chromatogram_table.setItem(i, _, QtWidgets.QTableWidgetItem(self.compound_data[self.compound_names[i]][_]))
 
         # Resizing the columns and rows to their contents
         self.ui.chromatogram_table.resizeColumnsToContents()
@@ -281,9 +286,9 @@ class Controller:
                 self.brackets[self.compound_names[i]] = begin, end
 
         # Changing titles of the plots
-        self.ui.chromatogram1.canvas.fig.suptitle('Ch1 (FF)')
-        self.ui.chromatogram2.canvas.fig.suptitle('Ch2 (FF)')
-        self.ui.chromatogram3.canvas.fig.suptitle('Ch3 (BF)')
+        self.ui.ch1_FF.canvas.fig.suptitle('Ch1 (FF)')
+        self.ui.ch2_FF.canvas.fig.suptitle('Ch2 (FF)')
+        self.ui.ch2_BF.canvas.fig.suptitle('Ch2 (BF)')
         self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
         self.ui.electron_image.canvas.fig.suptitle('Electron image')
 
@@ -291,7 +296,7 @@ class Controller:
         self.time = np.loadtxt(str(self.filename), skiprows=3, usecols=0)
         self.Ch1_FF = np.loadtxt(str(self.filename), skiprows=3, usecols=1)
         self.Ch2_FF = np.loadtxt(str(self.filename), skiprows=3, usecols=2)
-        self.Ch3_BF = np.loadtxt(str(self.filename), skiprows=3, usecols=3)
+        self.Ch2_BF = np.loadtxt(str(self.filename), skiprows=3, usecols=3)
 
         # Refreshing the plots
         if self.ui.enable_plots.isChecked():
@@ -306,64 +311,90 @@ class Controller:
     def plots(self, draw=True):
         # Based on the checkbox, the plots will be enabled or disabled
         if self.ui.enable_plots.checkState():
-            self.ui.chromatogram1.setEnabled(True)
-            self.ui.chromatogram2.setEnabled(True)
-            self.ui.chromatogram3.setEnabled(True)
+            self.ui.ch1_FF.setEnabled(True)
+            self.ui.ch2_FF.setEnabled(True)
+            self.ui.ch2_BF.setEnabled(True)
             self.ui.mass_spectrum.setEnabled(True)
             self.ui.electron_image.setEnabled(True)
 
             # Clearing the plots
-            self.ui.chromatogram1.canvas.ax.clear()
-            self.ui.chromatogram2.canvas.ax.clear()
-            self.ui.chromatogram3.canvas.ax.clear()
+            self.ui.ch1_FF.canvas.ax.clear()
+            self.ui.ch2_FF.canvas.ax.clear()
+            self.ui.ch2_BF.canvas.ax.clear()
+            self.ui.ch1_FF.canvas.fig.texts.clear()
+            self.ui.ch2_FF.canvas.fig.texts.clear()
+            self.ui.ch2_BF.canvas.fig.texts.clear()
             self.ui.mass_spectrum.canvas.ax.clear()
             self.ui.electron_image.canvas.ax.clear()
 
             # Plotting the data and brackets
-            self.ui.chromatogram1.canvas.ax.plot(self.time, self.Ch1_FF, 'b')
-            self.ui.chromatogram2.canvas.ax.plot(self.time, self.Ch2_FF, 'b')
-            self.ui.chromatogram3.canvas.ax.plot(self.time, self.Ch3_BF, 'b')
+            self.ui.ch1_FF.canvas.ax.plot(self.time, self.Ch1_FF, 'b')
+            self.ui.ch2_FF.canvas.ax.plot(self.time, self.Ch2_FF, 'b')
+            self.ui.ch2_BF.canvas.ax.plot(self.time, self.Ch2_BF, 'b')
 
             if self.loaded:
-                for i in range(len(self.compound_names)):
-                    if int(self.compound_data[self.compound_names[i]][-1]) == 1:
-                        self.ui.chromatogram1.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0], self.brackets[self.compound_names[i]][0][1], 'k', linestyle='dotted')
-                        self.ui.chromatogram1.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0], self.brackets[self.compound_names[i]][1][1], 'r', linestyle='dotted')
+                # Enabling the chromatogram table
+                self.ui.chromatogram_table.setEnabled(True)
 
-                    elif int(self.compound_data[self.compound_names[i]][-1]) == 2:
+                # The brackets
+                for i in range(len(self.compound_names)):
+                    channel = int(self.compound_data[self.compound_names[i]][7])
+                    detector = int(self.compound_data[self.compound_names[i]][8])
+
+                    # Channel 1 FF
+                    if channel == 1 and detector == 1:
+                        self.ui.ch1_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0],
+                                                      [0, max(self.Ch1_FF) * 0.1], 'k', linestyle='dotted')
+                        self.ui.ch1_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0],
+                                                      [0, max(self.Ch1_FF) * 0.1], 'r', linestyle='dotted')
+
+                    # Channel 2 FF
+                    elif channel == 2 and detector == 1:
                         if float(self.compound_data[self.compound_names[i]][5]) > 0:
-                            self.ui.chromatogram2.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0], self.brackets[self.compound_names[i]][0][1], 'k', linestyle='dotted')
-                            self.ui.chromatogram2.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0], self.brackets[self.compound_names[i]][1][1], 'r', linestyle='dotted')
+                            self.ui.ch2_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0],
+                                                          [0, max(self.Ch2_FF) * 0.1], 'k', linestyle='dotted')
+                            self.ui.ch2_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0],
+                                                          [0, max(self.Ch2_FF) * 0.1], 'r', linestyle='dotted')
+
+                    # Channel 2 BF
+                    elif channel == 2 and detector == 2:
+                        if float(self.compound_data[self.compound_names[i]][5]) > 0:
+                            self.ui.ch2_BF.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0], [0, (abs(min(self.Ch2_BF)) + max(self.Ch2_BF))
+                                                                                                        * 0.1], 'k', linestyle='dotted')
+                            self.ui.ch2_BF.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0], [0, (abs(min(self.Ch2_BF)) + max(self.Ch2_BF))
+                                                                                                        * 0.1], 'r', linestyle='dotted')
 
             if draw:
                 # Showing the plots
-                self.ui.chromatogram1.canvas.draw()
-                self.ui.chromatogram2.canvas.draw()
-                self.ui.chromatogram3.canvas.draw()
+                self.ui.ch1_FF.canvas.draw()
+                self.ui.ch2_FF.canvas.draw()
+                self.ui.ch2_BF.canvas.draw()
                 self.ui.mass_spectrum.canvas.draw()
                 self.ui.electron_image.canvas.draw()
 
         else:
-            self.ui.chromatogram1.setEnabled(False)
-            self.ui.chromatogram2.setEnabled(False)
-            self.ui.chromatogram3.setEnabled(False)
+            self.ui.ch1_FF.setEnabled(False)
+            self.ui.ch2_FF.setEnabled(False)
+            self.ui.ch2_BF.setEnabled(False)
             self.ui.mass_spectrum.setEnabled(False)
             self.ui.electron_image.setEnabled(False)
 
             # Clearing plots and redrawing them
-            self.ui.chromatogram1.canvas.ax.clear()
-            self.ui.chromatogram1.canvas.draw()
-            self.ui.chromatogram2.canvas.ax.clear()
-            self.ui.chromatogram2.canvas.draw()
-            self.ui.chromatogram3.canvas.ax.clear()
-            self.ui.chromatogram3.canvas.draw()
+            self.ui.ch1_FF.canvas.ax.clear()
+            self.ui.ch1_FF.canvas.draw()
+            self.ui.ch2_FF.canvas.ax.clear()
+            self.ui.ch2_FF.canvas.draw()
+            self.ui.ch2_BF.canvas.ax.clear()
+            self.ui.ch2_BF.canvas.draw()
             self.ui.mass_spectrum.canvas.ax.clear()
             self.ui.mass_spectrum.canvas.draw()
             self.ui.electron_image.canvas.ax.clear()
             self.ui.electron_image.canvas.draw()
 
     # When the chromatogram is double-clicked, the event below will execute
-    def on_click(self, event):
+    def plot_click(self, event):
+        print(event.xdata, event.ydata)  # TODO Create zoom function
+
         if event.dblclick:
             try:
                 ix = round(float(event.xdata), 2)  # Location of the plot click
@@ -371,13 +402,13 @@ class Controller:
                 line_x = self.time[index]
 
                 self.plots(draw=False)
-                self.ui.chromatogram1.canvas.ax.plot([line_x, line_x], [min(self.Ch1_FF), max(self.Ch1_FF)], 'y')
-                self.ui.chromatogram2.canvas.ax.plot([line_x, line_x], [min(self.Ch2_FF), max(self.Ch2_FF)], 'y')
-                self.ui.chromatogram3.canvas.ax.plot([line_x, line_x], [min(self.Ch3_BF), max(self.Ch3_BF)], 'y')
+                self.ui.ch1_FF.canvas.ax.plot([line_x, line_x], [min(self.Ch1_FF), max(self.Ch1_FF)], 'y')
+                self.ui.ch2_FF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_FF), max(self.Ch2_FF)], 'y')
+                self.ui.ch2_BF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'y')
 
-                self.ui.chromatogram1.canvas.draw()
-                self.ui.chromatogram2.canvas.draw()
-                self.ui.chromatogram3.canvas.draw()
+                self.ui.ch1_FF.canvas.draw()
+                self.ui.ch2_FF.canvas.draw()
+                self.ui.ch2_BF.canvas.draw()
                 self.ui.mass_spectrum.canvas.ax.clear()
 
                 # Selecting the TOF file based on which location of the plot has been clicked
@@ -404,6 +435,36 @@ class Controller:
 
             except Exception as e:
                 print(f'Click inside the boundaries because the {e}')
+
+    def table_click(self):
+        self.plots(draw=False)
+        index = self.ui.chromatogram_table.currentRow()
+        channel = int(self.compound_data[self.compound_names[index]][7])
+        detector = int(self.compound_data[self.compound_names[index]][8])
+        x = float(self.compound_data[self.compound_names[index]][1])
+
+        if x != 0:
+            if channel == 1 and detector == 1:
+                self.ui.tabWidget.setCurrentIndex(0)
+                self.ui.ch1_FF.canvas.ax.plot([x, x], [min(self.Ch1_FF), max(self.Ch1_FF)], 'grey', linestyle='dotted')
+                self.ui.ch1_FF.canvas.fig.text(x, max(self.Ch1_FF), self.compound_names[index], transform=self.ui.ch1_FF.
+                                               canvas.ax.transData, color='red')
+
+            elif channel == 2 and detector == 1:
+                self.ui.tabWidget.setCurrentIndex(1)
+                self.ui.ch2_FF.canvas.ax.plot([x, x], [min(self.Ch2_FF), max(self.Ch2_FF)], 'grey', linestyle='dotted')
+                self.ui.ch2_FF.canvas.fig.text(x, max(self.Ch2_FF), self.compound_names[index], transform=self.ui.
+                                               ch2_FF.canvas.ax.transData, color='red')
+
+            elif channel == 2 and detector == 2:
+                self.ui.tabWidget.setCurrentIndex(2)
+                self.ui.ch2_BF.canvas.ax.plot([x, x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'grey', linestyle='dotted')
+                self.ui.ch2_BF.canvas.fig.text(x, max(self.Ch2_BF), self.compound_names[index], transform=self.ui.ch2_BF.canvas.ax.transData,
+                                               color='red')
+
+        self.ui.ch1_FF.canvas.draw()
+        self.ui.ch2_FF.canvas.draw()
+        self.ui.ch2_BF.canvas.draw()
 
     # The function to open the injector window
     def open_injector_window(self):
