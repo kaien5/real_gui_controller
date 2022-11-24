@@ -440,13 +440,13 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="Ch1_FF_tab">
      <attribute name="title">
       <string>Ch1 (FF)</string>
      </attribute>
-     <widget class="MplWidget" name="ch1_FF">
+     <widget class="MplWidget" name="Ch1_FF">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -457,6 +457,26 @@
         <width>1591</width>
         <height>381</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="reset_Ch1_FF">
+      <property name="geometry">
+       <rect>
+        <x>1480</x>
+        <y>10</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Reset</string>
       </property>
      </widget>
     </widget>
@@ -464,7 +484,7 @@
      <attribute name="title">
       <string>Ch2 (FF)</string>
      </attribute>
-     <widget class="MplWidget" name="ch2_FF">
+     <widget class="MplWidget" name="Ch2_FF">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -477,12 +497,32 @@
        </rect>
       </property>
      </widget>
+     <widget class="QPushButton" name="reset_Ch2_FF">
+      <property name="geometry">
+       <rect>
+        <x>1480</x>
+        <y>10</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Reset</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="Ch2_BF_tab">
      <attribute name="title">
       <string>Ch2 (BF)</string>
      </attribute>
-     <widget class="MplWidget" name="ch2_BF">
+     <widget class="MplWidget" name="Ch2_BF">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -493,6 +533,26 @@
         <width>1591</width>
         <height>381</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="reset_Ch2_BF">
+      <property name="geometry">
+       <rect>
+        <x>1480</x>
+        <y>10</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Reset</string>
       </property>
      </widget>
     </widget>
@@ -595,7 +655,7 @@
      <x>0</x>
      <y>0</y>
      <width>1896</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Open">
