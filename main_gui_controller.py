@@ -48,10 +48,8 @@ class Controller:
         self.ui.microGC_settings_button.clicked.connect(self.open_micro_gc_window)
         self.ui.sequence_number.valueChanged.connect(self.sequence_selection)
         self.ui.motor_settings_button.clicked.connect(self.open_motor_window)
+        self.ui.reset_chromatogram.clicked.connect(self.reset_chromatograms)
         self.ui.hvc_settings_button.clicked.connect(self.open_hvc_window)
-        self.ui.reset_Ch1_FF.clicked.connect(self.reset_chromatograms)
-        self.ui.reset_Ch2_FF.clicked.connect(self.reset_chromatograms)
-        self.ui.reset_Ch2_BF.clicked.connect(self.reset_chromatograms)
         self.ui.chromatogram_table.clicked.connect(self.table_click)
         self.ui.action_Open.triggered.connect(self.open_file)
         self.ui.refresh_button.clicked.connect(self.refresh)
@@ -59,6 +57,8 @@ class Controller:
         self.ui.start_button.clicked.connect(self.start)
         self.ui.enable_plots.toggled.connect(self.plots)
         self.ui.stop_button.clicked.connect(self.stop)
+        self.ui.zoom_box.clicked.connect(self.zoom)
+        self.ui.line_box.clicked.connect(self.line)
 
         # Clicked on functions
         self.ui.Ch1_FF.canvas.mpl_connect('button_press_event', self.plot_click)
@@ -96,6 +96,7 @@ class Controller:
             self.Ch1_FF = data[1]
             self.Ch2_FF = data[2]
             self.Ch2_BF = data[3]
+
         else:
             file_name = os.getcwd() + '/Data/Demo_file.txt'
             self.ui.Ch1_FF.canvas.fig.suptitle('Demo Data')
@@ -108,10 +109,11 @@ class Controller:
             self.Ch2_FF = np.loadtxt(file_name, skiprows=3, usecols=2)
             self.Ch2_BF = np.loadtxt(file_name, skiprows=3, usecols=3)
 
+    # The function to select a sequence on the microGC
     def sequence_selection(self):
         self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
 
-    # Start the data acquisition
+    # The function to start the data acquisition
     def start(self):
         global check
         try:
@@ -143,6 +145,7 @@ class Controller:
         except:
             self.ui.microGC_status.setText('Invalid IP Address')
 
+    # The function to stop data acquisition
     def stop(self):
         global check
         self.client.write_register(0x9D0A, 1)
@@ -154,6 +157,7 @@ class Controller:
         check = False
         self.ui.microGC_status.setText('Run cancelled')
 
+    # The function to check the connection of the machines
     def refresh(self):
         try:
             microGC_ip = self.ui.ip_address_microGC.text()
@@ -183,7 +187,7 @@ class Controller:
         except:
             self.ui.microGC_status.setText('No connection possible')
 
-    # This is to check whether the MicroGC is busy
+    # This function is to check whether the MicroGC is busy
     def check_microGC(self):
         global check
 
@@ -208,6 +212,7 @@ class Controller:
                 check = False
             self.client.close()
 
+    # The function to load in data from the connected machines
     def load_data(self):
         # Communicating to the plot function
         self.loaded = True
@@ -315,8 +320,8 @@ class Controller:
         # Closing the connection to the client
         self.client.close()
 
+    # The function to enable or disable the plots
     def plots(self, draw=True):
-        # Based on the checkbox, the plots will be enabled or disabled
         if self.ui.enable_plots.checkState():
             self.ui.Ch1_FF.setEnabled(True)
             self.ui.Ch2_FF.setEnabled(True)
@@ -400,49 +405,62 @@ class Controller:
 
     # When the chromatogram is double-clicked, the event below will execute
     def plot_click(self, event):
-        if event.dblclick:
-            try:
-                ix = round(float(event.xdata), 2)  # Location of the plot click
-                index = np.where(self.time == ix)[0][0]  # Index location on where the line_x should appear
-                line_x = self.time[index]
+        if self.ui.line_box.isChecked():
+            if event.dblclick:
+                try:
+                    ix = round(float(event.xdata), 2)  # Location of the plot click
+                    index = np.where(self.time == ix)[0][0]  # Index location on where the line_x should appear
+                    line_x = self.time[index]
 
-                self.plots(draw=False)
-                self.ui.Ch1_FF.canvas.ax.plot([line_x, line_x], [min(self.Ch1_FF), max(self.Ch1_FF)], 'y')
-                self.ui.Ch2_FF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_FF), max(self.Ch2_FF)], 'y')
-                self.ui.Ch2_BF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'y')
+                    self.plots(draw=False)
+                    self.ui.Ch1_FF.canvas.ax.plot([line_x, line_x], [min(self.Ch1_FF), max(self.Ch1_FF)], 'y')
+                    self.ui.Ch2_FF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_FF), max(self.Ch2_FF)], 'y')
+                    self.ui.Ch2_BF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'y')
 
-                self.ui.Ch1_FF.canvas.draw()
-                self.ui.Ch2_FF.canvas.draw()
-                self.ui.Ch2_BF.canvas.draw()
-                self.ui.mass_spectrum.canvas.ax.clear()
+                    if self.ui.Ch1_FF_tab.isVisible():
+                        self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
+                        self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
 
-                # Selecting the TOF file based on which location of the plot has been clicked
-                with h5py.File('Data/scan_example.h5', 'r') as f:
-                    tof_list = list(f.keys())[0]
+                    elif self.ui.Ch2_FF.isVisible():
+                        self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
+                        self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
 
-                    # Creating a list for the files in TOF
-                    x = []
-                    for _ in f[tof_list]:
-                        x.append(_)
+                    elif self.ui.Ch2_BF.isVisible():
+                        self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
+                        self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
 
-                    tof_nr = f[tof_list][x[abs(round(ix))]]
-                    tof = np.squeeze(tof_nr['TOF0'])
-                    self.ui.mass_spectrum.canvas.ax.plot(tof)
-                    self.ui.mass_spectrum.canvas.draw()
+                    self.ui.Ch1_FF.canvas.draw()
+                    self.ui.Ch2_FF.canvas.draw()
+                    self.ui.Ch2_BF.canvas.draw()
+                    self.ui.mass_spectrum.canvas.ax.clear()
 
-                # Selecting the electron image based on which location of the plot has been clicked
-                with h5py.File('Data/example.h5', 'r') as f:
-                    picture_nr = round(abs(round(ix)) / max(self.time) * 9)
-                    electron_list = list(f.keys())[0]
-                    electron_images = f[electron_list][()]
-                    self.ui.electron_image.canvas.ax.imshow(electron_images[picture_nr])
-                    self.ui.electron_image.canvas.draw()
+                    # Selecting the TOF file based on which location of the plot has been clicked
+                    with h5py.File('Data/scan_example.h5', 'r') as f:
+                        tof_list = list(f.keys())[0]
 
-            except Exception as e:
-                print(f'Click inside the boundaries because the {e}')
+                        # Creating a list for the files in TOF
+                        x = []
+                        for _ in f[tof_list]:
+                            x.append(_)
 
-        # The zoom function per graph
-        else:
+                        tof_nr = f[tof_list][x[abs(round(ix))]]
+                        tof = np.squeeze(tof_nr['TOF0'])
+                        self.ui.mass_spectrum.canvas.ax.plot(tof)
+                        self.ui.mass_spectrum.canvas.draw()
+
+                    # Selecting the electron image based on which location of the plot has been clicked
+                    with h5py.File('Data/example.h5', 'r') as f:
+                        picture_nr = round(abs(round(ix)) / max(self.time) * 9)
+                        electron_list = list(f.keys())[0]
+                        electron_images = f[electron_list][()]
+                        self.ui.electron_image.canvas.ax.imshow(electron_images[picture_nr])
+                        self.ui.electron_image.canvas.draw()
+
+                except Exception as e:
+                    print(f'Click inside the boundaries of the plot. {e}')
+
+        # The zoom in function per graph
+        if self.ui.zoom_box.isChecked():
             if self.first_click:
                 self.first_click = False
                 self.x1, self.y1 = event.xdata, event.ydata
@@ -451,37 +469,58 @@ class Controller:
                 self.first_click = True
                 self.x2, self.y2 = event.xdata, event.ydata
 
-                if self.x1 != self.x2 or self.y1 != self.y2:
-                    if self.ui.Ch1_FF_tab.isVisible():
-                        self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                        self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
-                        self.ui.Ch1_FF.canvas.draw()
+                try:
+                    if self.x1 != self.x2 or self.y1 != self.y2:
+                        if self.ui.Ch1_FF_tab.isVisible():
+                            self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
+                            self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                            self.ui.Ch1_FF.canvas.draw()
 
-                    elif self.ui.Ch2_FF_tab.isVisible():
-                        self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                        self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
-                        self.ui.Ch2_FF.canvas.draw()
+                        elif self.ui.Ch2_FF_tab.isVisible():
+                            self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
+                            self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                            self.ui.Ch2_FF.canvas.draw()
 
-                    elif self.ui.Ch2_BF_tab.isVisible():
-                        self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                        self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
-                        self.ui.Ch2_BF.canvas.draw()
+                        elif self.ui.Ch2_BF_tab.isVisible():
+                            self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
+                            self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                            self.ui.Ch2_BF.canvas.draw()
 
-                else:
-                    pass
+                    else:
+                        pass
+
+                except Exception as e:
+                    print(f'Zoom inside of the boundaries of the plot. {e}')
+
+    # The function to of checkbox interaction
+    def line(self):
+        if self.ui.line_box.isChecked():
+            self.ui.line_box.setChecked(True)
+            self.ui.zoom_box.setChecked(False)
+
+    def zoom(self):
+        if self.ui.zoom_box.isChecked():
+            self.ui.line_box.setChecked(False)
+            self.ui.zoom_box.setChecked(True)
 
     # Reset the zoom in of the chromatograms
     def reset_chromatograms(self):
-        self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
-        self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
-        self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
-        self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05, max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05])
-        self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05, max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05])
-        self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05, max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05])
-        self.ui.Ch1_FF.canvas.draw()
-        self.ui.Ch2_FF.canvas.draw()
-        self.ui.Ch2_BF.canvas.draw()
+        if self.ui.Ch1_FF_tab.isVisible():
+            self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
+            self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05, max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05])
+            self.ui.Ch1_FF.canvas.draw()
 
+        elif self.ui.Ch2_FF_tab.isVisible():
+            self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
+            self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05, max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05])
+            self.ui.Ch2_FF.canvas.draw()
+
+        elif self.ui.Ch2_BF_tab.isVisible():
+            self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
+            self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05, max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05])
+            self.ui.Ch2_BF.canvas.draw()
+
+    # The table interaction of compounds
     def table_click(self):
         self.plots(draw=False)
         index = self.ui.chromatogram_table.currentRow()
@@ -520,12 +559,15 @@ class Controller:
     def open_micro_gc_window(self):
         self.window_GC = MicroGcController()
 
+    # The function to open the hvc window
     def open_hvc_window(self):
         self.window_hvc = hvc_controller.HvcController()
 
+    # The function to open the motor window
     def open_motor_window(self):
         self.window_motor = motor_controller.MotorController()
 
+    # The function to open a file
     def open_file(self):
         self.MainWindow.close()
         self.fileBrowserWidget = file_browser.FileBrowserController(open_file=True, main=True)

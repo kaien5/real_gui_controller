@@ -435,12 +435,12 @@
      <rect>
       <x>300</x>
       <y>10</y>
-      <width>1591</width>
+      <width>1491</width>
       <height>401</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="Ch1_FF_tab">
      <attribute name="title">
@@ -454,29 +454,9 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1591</width>
+        <width>1491</width>
         <height>381</height>
        </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="reset_Ch1_FF">
-      <property name="geometry">
-       <rect>
-        <x>1480</x>
-        <y>10</y>
-        <width>93</width>
-        <height>28</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Reset</string>
       </property>
      </widget>
     </widget>
@@ -497,26 +477,6 @@
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="reset_Ch2_FF">
-      <property name="geometry">
-       <rect>
-        <x>1480</x>
-        <y>10</y>
-        <width>93</width>
-        <height>28</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Reset</string>
-      </property>
-     </widget>
     </widget>
     <widget class="QWidget" name="Ch2_BF_tab">
      <attribute name="title">
@@ -533,26 +493,6 @@
         <width>1591</width>
         <height>381</height>
        </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="reset_Ch2_BF">
-      <property name="geometry">
-       <rect>
-        <x>1480</x>
-        <y>10</y>
-        <width>93</width>
-        <height>28</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Reset</string>
       </property>
      </widget>
     </widget>
@@ -633,9 +573,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>10</x>
         <y>10</y>
-        <width>1241</width>
+        <width>1561</width>
         <height>531</height>
        </rect>
       </property>
@@ -647,6 +587,65 @@
       </property>
      </widget>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="reset_chromatogram">
+    <property name="geometry">
+     <rect>
+      <x>1800</x>
+      <y>40</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Reset</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="zoom_box">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>70</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Zoom</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="line_box">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>90</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Line</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
