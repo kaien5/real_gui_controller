@@ -168,7 +168,7 @@ class Ui_MainWindow(object):
         self.Ch1_FF_tab.setObjectName("Ch1_FF_tab")
         self.Ch1_FF = MplWidget(self.Ch1_FF_tab)
         self.Ch1_FF.setEnabled(False)
-        self.Ch1_FF.setGeometry(QtCore.QRect(0, 0, 1491, 381))
+        self.Ch1_FF.setGeometry(QtCore.QRect(0, 0, 1591, 381))
         self.Ch1_FF.setObjectName("Ch1_FF")
         self.tabWidget.addTab(self.Ch1_FF_tab, "")
         self.Ch2_FF_tab = QtWidgets.QWidget()

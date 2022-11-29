@@ -109,6 +109,19 @@ class Controller:
             self.Ch2_FF = np.loadtxt(file_name, skiprows=3, usecols=2)
             self.Ch2_BF = np.loadtxt(file_name, skiprows=3, usecols=3)
 
+        self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+        self.Ch1_FF_x2 = max(self.time) - max(self.time) * 0.05
+        self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
+        self.Ch2_FF_x2 = max(self.time) - max(self.time) * 0.05
+        self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
+        self.Ch2_BF_x2 = max(self.time) - max(self.time) * 0.05
+        self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
+        self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
+        self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
+        self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
+        self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
+        self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
+
     # The function to select a sequence on the microGC
     def sequence_selection(self):
         self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
@@ -310,6 +323,20 @@ class Controller:
         self.Ch2_FF = np.loadtxt(str(self.filename), skiprows=3, usecols=2)
         self.Ch2_BF = np.loadtxt(str(self.filename), skiprows=3, usecols=3)
 
+        # The values for the x and y limit
+        self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+        self.Ch1_FF_x2 = max(self.time) + max(self.time) * 0.05
+        self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
+        self.Ch2_FF_x2 = max(self.time) + max(self.time) * 0.05
+        self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
+        self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
+        self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
+        self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
+        self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
+        self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
+        self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
+        self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
+
         # Refreshing the plots
         if self.ui.enable_plots.isChecked():
             self.ui.enable_plots.toggle()
@@ -418,16 +445,16 @@ class Controller:
                     self.ui.Ch2_BF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'y')
 
                     if self.ui.Ch1_FF_tab.isVisible():
-                        self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                        self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                        self.ui.Ch1_FF.canvas.ax.set_xlim([self.Ch1_FF_x1, self.Ch1_FF_x2])
+                        self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.Ch1_FF_y1, self.Ch1_FF_y2), max(self.Ch1_FF_y1, self.Ch1_FF_y2)])
 
                     elif self.ui.Ch2_FF.isVisible():
-                        self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                        self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                        self.ui.Ch2_FF.canvas.ax.set_xlim([self.Ch2_FF_x1, self.Ch2_FF_x2])
+                        self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.Ch2_FF_y1, self.Ch2_FF_y2), max(self.Ch2_FF_y1, self.Ch2_FF_y2)])
 
                     elif self.ui.Ch2_BF.isVisible():
-                        self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                        self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                        self.ui.Ch2_BF.canvas.ax.set_xlim([self.Ch2_BF_x1, self.Ch2_BF_x2])
+                        self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.Ch2_BF_y1, self.Ch2_BF_y2), max(self.Ch2_BF_y1, self.Ch2_BF_y2)])
 
                     self.ui.Ch1_FF.canvas.draw()
                     self.ui.Ch2_FF.canvas.draw()
@@ -461,36 +488,48 @@ class Controller:
 
         # The zoom in function per graph
         if self.ui.zoom_box.isChecked():
-            if self.first_click:
-                self.first_click = False
-                self.x1, self.y1 = event.xdata, event.ydata
+            try:
+                if self.first_click:
+                    self.x1, self.y1 = event.xdata, event.ydata
+                    self.first_click = False
+                    if self.ui.Ch1_FF_tab.isVisible():
+                        self.Ch1_FF_x1, self.Ch1_FF_y1 = event.xdata, event.ydata
+                    elif self.ui.Ch2_FF_tab.isVisible():
+                        self.Ch2_FF_x1, self.Ch2_FF_y1 = event.xdata, event.ydata
+                    elif self.ui.Ch2_BF_tab.isVisible():
+                        self.Ch2_BF_x1, self.Ch2_BF_y1 = event.xdata, event.ydata
 
-            else:
-                self.first_click = True
-                self.x2, self.y2 = event.xdata, event.ydata
+                else:
+                    self.x2, self.y2 = event.xdata, event.ydata
+                    self.first_click = True
+                    if self.ui.Ch1_FF_tab.isVisible():
+                        self.Ch1_FF_x2, self.Ch1_FF_y2 = event.xdata, event.ydata
+                    elif self.ui.Ch2_FF_tab.isVisible():
+                        self.Ch2_FF_x2, self.Ch2_FF_y2 = event.xdata, event.ydata
+                    elif self.ui.Ch2_BF_tab.isVisible():
+                        self.Ch2_BF_x2, self.Ch2_BF_y2 = event.xdata, event.ydata
 
-                try:
                     if self.x1 != self.x2 or self.y1 != self.y2:
                         if self.ui.Ch1_FF_tab.isVisible():
-                            self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                            self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                            self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.Ch1_FF_x1, self.Ch1_FF_x2), max(self.Ch1_FF_x1, self.Ch1_FF_x2)])
+                            self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.Ch1_FF_y1, self.Ch1_FF_y2), max(self.Ch1_FF_y1, self.Ch1_FF_y2)])
                             self.ui.Ch1_FF.canvas.draw()
 
                         elif self.ui.Ch2_FF_tab.isVisible():
-                            self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                            self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                            self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.Ch2_FF_x1, self.Ch2_FF_x2), max(self.Ch2_FF_x1, self.Ch2_FF_x2)])
+                            self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.Ch2_FF_y1, self.Ch2_FF_y2), max(self.Ch2_FF_y1, self.Ch2_FF_y2)])
                             self.ui.Ch2_FF.canvas.draw()
 
                         elif self.ui.Ch2_BF_tab.isVisible():
-                            self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.x1, self.x2), max(self.x1, self.x2)])
-                            self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.y1, self.y2), max(self.y1, self.y2)])
+                            self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.Ch2_BF_x1, self.Ch2_BF_x2), max(self.Ch2_BF_x1, self.Ch2_BF_x2)])
+                            self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.Ch2_BF_y1, self.Ch2_BF_y2), max(self.Ch2_BF_y1, self.Ch2_BF_y2)])
                             self.ui.Ch2_BF.canvas.draw()
 
                     else:
                         pass
 
-                except Exception as e:
-                    print(f'Zoom inside of the boundaries of the plot. {e}')
+            except Exception as e:
+                print(f'Zoom inside of the boundaries of the plot. {e}')
 
     # The function to of checkbox interaction
     def line(self):
@@ -506,18 +545,30 @@ class Controller:
     # Reset the zoom in of the chromatograms
     def reset_chromatograms(self):
         if self.ui.Ch1_FF_tab.isVisible():
-            self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
-            self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05, max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05])
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x2 = max(self.time) + max(self.time) * 0.05
+            self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
+            self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
+            self.ui.Ch1_FF.canvas.ax.set_xlim([self.Ch1_FF_x1, self.Ch1_FF_x2])
+            self.ui.Ch1_FF.canvas.ax.set_ylim([self.Ch1_FF_y1, self.Ch1_FF_y2])
             self.ui.Ch1_FF.canvas.draw()
 
         elif self.ui.Ch2_FF_tab.isVisible():
-            self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
-            self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05, max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05])
+            self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch2_FF_x2 = max(self.time) + max(self.time) * 0.05
+            self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
+            self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
+            self.ui.Ch2_FF.canvas.ax.set_xlim([self.Ch2_FF_x1, self.Ch2_FF_x2])
+            self.ui.Ch2_FF.canvas.ax.set_ylim([self.Ch2_FF_y1, self.Ch2_FF_y2])
             self.ui.Ch2_FF.canvas.draw()
 
         elif self.ui.Ch2_BF_tab.isVisible():
-            self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05])
-            self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05, max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05])
+            self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
+            self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
+            self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
+            self.ui.Ch2_BF.canvas.ax.set_xlim([self.Ch2_BF_x1, self.Ch2_BF_x2])
+            self.ui.Ch2_BF.canvas.ax.set_ylim([self.Ch2_BF_y1, self.Ch2_BF_y2])
             self.ui.Ch2_BF.canvas.draw()
 
     # The table interaction of compounds
