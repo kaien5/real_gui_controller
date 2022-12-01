@@ -491,23 +491,25 @@ class Controller:
             try:
                 if self.first_click:
                     self.x1, self.y1 = event.xdata, event.ydata
-                    self.first_click = False
-                    if self.ui.Ch1_FF_tab.isVisible():
-                        self.Ch1_FF_x1, self.Ch1_FF_y1 = event.xdata, event.ydata
-                    elif self.ui.Ch2_FF_tab.isVisible():
-                        self.Ch2_FF_x1, self.Ch2_FF_y1 = event.xdata, event.ydata
-                    elif self.ui.Ch2_BF_tab.isVisible():
-                        self.Ch2_BF_x1, self.Ch2_BF_y1 = event.xdata, event.ydata
+                    if isinstance(self.x1, float) and isinstance(self.y1, float):
+                        self.first_click = False
+                        if self.ui.Ch1_FF_tab.isVisible():
+                            self.Ch1_FF_x1, self.Ch1_FF_y1 = event.xdata, event.ydata
+                        elif self.ui.Ch2_FF_tab.isVisible():
+                            self.Ch2_FF_x1, self.Ch2_FF_y1 = event.xdata, event.ydata
+                        elif self.ui.Ch2_BF_tab.isVisible():
+                            self.Ch2_BF_x1, self.Ch2_BF_y1 = event.xdata, event.ydata
 
                 else:
                     self.x2, self.y2 = event.xdata, event.ydata
                     self.first_click = True
-                    if self.ui.Ch1_FF_tab.isVisible():
-                        self.Ch1_FF_x2, self.Ch1_FF_y2 = event.xdata, event.ydata
-                    elif self.ui.Ch2_FF_tab.isVisible():
-                        self.Ch2_FF_x2, self.Ch2_FF_y2 = event.xdata, event.ydata
-                    elif self.ui.Ch2_BF_tab.isVisible():
-                        self.Ch2_BF_x2, self.Ch2_BF_y2 = event.xdata, event.ydata
+                    if isinstance(self.x2, float) and isinstance(self.y2, float):
+                        if self.ui.Ch1_FF_tab.isVisible():
+                            self.Ch1_FF_x2, self.Ch1_FF_y2 = event.xdata, event.ydata
+                        elif self.ui.Ch2_FF_tab.isVisible():
+                            self.Ch2_FF_x2, self.Ch2_FF_y2 = event.xdata, event.ydata
+                        elif self.ui.Ch2_BF_tab.isVisible():
+                            self.Ch2_BF_x2, self.Ch2_BF_y2 = event.xdata, event.ydata
 
                     if self.x1 != self.x2 or self.y1 != self.y2:
                         if self.ui.Ch1_FF_tab.isVisible():
@@ -531,12 +533,13 @@ class Controller:
             except Exception as e:
                 print(f'Zoom inside of the boundaries of the plot. {e}')
 
-    # The function to of checkbox interaction
+    # The function to apply a line
     def line(self):
         if self.ui.line_box.isChecked():
             self.ui.line_box.setChecked(True)
             self.ui.zoom_box.setChecked(False)
 
+    # The function to apply a zoom
     def zoom(self):
         if self.ui.zoom_box.isChecked():
             self.ui.line_box.setChecked(False)
