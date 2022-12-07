@@ -1,8 +1,7 @@
-from sys import argv
-
-from PyQt5 import QtWidgets
-
 import main_gui_controller
+
+from sys import argv
+from PyQt5 import QtWidgets
 from application import Ui_Application_name
 
 

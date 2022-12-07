@@ -34,6 +34,3 @@
 #
 # # Display graph
 # plt.show()
-
-bla = type(float('1.5'))
-print(type(bla))

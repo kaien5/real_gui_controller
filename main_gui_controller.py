@@ -1,4 +1,6 @@
 import os
+import socket
+
 import h5py
 import struct
 import numpy as np
@@ -9,6 +11,8 @@ import motor_controller
 
 from time import sleep
 from PyQt5 import QtWidgets
+
+import tof_ms_analysis as tof
 from main_gui import Ui_MainWindow
 from pymodbus.constants import Endian
 from pymodbus.client.sync import ModbusTcpClient
@@ -48,6 +52,7 @@ class Controller:
         self.ui.microGC_settings_button.clicked.connect(self.open_micro_gc_window)
         self.ui.sequence_number.valueChanged.connect(self.sequence_selection)
         self.ui.motor_settings_button.clicked.connect(self.open_motor_window)
+        self.ui.connect_labview_button.clicked.connect(self.labview_connect)
         self.ui.reset_chromatogram.clicked.connect(self.reset_chromatograms)
         self.ui.hvc_settings_button.clicked.connect(self.open_hvc_window)
         self.ui.chromatogram_table.clicked.connect(self.table_click)
@@ -80,8 +85,6 @@ class Controller:
         self.ui.Ch2_FF.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
         self.ui.Ch2_BF.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
         self.ui.Ch2_BF.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
-        self.ui.mass_spectrum.canvas.fig.text(0.85, 0.05, 'Index nr.', ha='center', va='center')
-        self.ui.mass_spectrum.canvas.fig.text(0.05, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
 
         # Disabling the plots at start up
         self.ui.Ch1_FF.setEnabled(False)
@@ -110,17 +113,38 @@ class Controller:
             self.Ch2_BF = np.loadtxt(file_name, skiprows=3, usecols=3)
 
         self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch1_FF_x2 = max(self.time) - max(self.time) * 0.05
+        self.Ch1_FF_x2 = max(self.time) + max(self.time) * 0.05
         self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch2_FF_x2 = max(self.time) - max(self.time) * 0.05
+        self.Ch2_FF_x2 = max(self.time) + max(self.time) * 0.05
         self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch2_BF_x2 = max(self.time) - max(self.time) * 0.05
+        self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
         self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
         self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
         self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
         self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
         self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
         self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
+
+    def labview_connect(self):
+        try:
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_address = ('localhost', 6340)
+            client.connect(server_address)
+            message = self.ui.connect_labview_line.text()
+            client.send(message.encode('utf-8'))
+            client.close()
+
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.bind(('localhost', 6350))
+            server.listen(1)
+
+            receive, adr = server.accept()
+            cmnd = receive.recv(12)
+            print(cmnd)
+            server.close()
+
+        except Exception as e:
+            print(e)
 
     # The function to select a sequence on the microGC
     def sequence_selection(self):
@@ -445,15 +469,15 @@ class Controller:
                     self.ui.Ch2_BF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'y')
 
                     if self.ui.Ch1_FF_tab.isVisible():
-                        self.ui.Ch1_FF.canvas.ax.set_xlim([self.Ch1_FF_x1, self.Ch1_FF_x2])
+                        self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.Ch1_FF_x1, self.Ch1_FF_x2), max(self.Ch1_FF_x1, self.Ch1_FF_x2)])
                         self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.Ch1_FF_y1, self.Ch1_FF_y2), max(self.Ch1_FF_y1, self.Ch1_FF_y2)])
 
                     elif self.ui.Ch2_FF.isVisible():
-                        self.ui.Ch2_FF.canvas.ax.set_xlim([self.Ch2_FF_x1, self.Ch2_FF_x2])
+                        self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.Ch2_FF_x1, self.Ch2_FF_x2), max(self.Ch2_FF_x1, self.Ch2_FF_x2)])
                         self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.Ch2_FF_y1, self.Ch2_FF_y2), max(self.Ch2_FF_y1, self.Ch2_FF_y2)])
 
                     elif self.ui.Ch2_BF.isVisible():
-                        self.ui.Ch2_BF.canvas.ax.set_xlim([self.Ch2_BF_x1, self.Ch2_BF_x2])
+                        self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.Ch2_BF_x1, self.Ch2_BF_x2), max(self.Ch2_BF_x1, self.Ch2_BF_x2)])
                         self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.Ch2_BF_y1, self.Ch2_BF_y2), max(self.Ch2_BF_y1, self.Ch2_BF_y2)])
 
                     self.ui.Ch1_FF.canvas.draw()
@@ -471,8 +495,25 @@ class Controller:
                             x.append(_)
 
                         tof_nr = f[tof_list][x[abs(round(ix))]]
-                        tof = np.squeeze(tof_nr['TOF0'])
-                        self.ui.mass_spectrum.canvas.ax.plot(tof)
+                        tof_spectrum = np.squeeze(tof_nr['TOF0'])
+                        lr_spec = tof.reduce_res(tof_spectrum, 30)
+                        mz = tof.mz_calibration(lr_spec, bins=[10235, 11087, 15182], masses=[69, 81, 152], plot=False)
+
+                        ampl = lr_spec / np.max(lr_spec)
+                        nist_data = []
+                        mz_jdx, ampl_jdx = tof.read_jdx('Data/nist_data.jdx')
+                        ampl_jdx = ampl_jdx / np.max(ampl_jdx)
+                        nist_data.append((mz_jdx, ampl_jdx))
+
+                        # The comparison below needs more data files, it has only 1 at this moment
+                        for i in range(len(nist_data)):
+                            self.ui.mass_spectrum.canvas.ax.bar(nist_data[i][0], -nist_data[i][1], label='NIST database', color='r')
+
+                        self.ui.mass_spectrum.canvas.ax.plot(mz, ampl, "k-", label='Experiment')
+
+                        # The * 0.5 below is a temporary correction
+                        self.ui.mass_spectrum.canvas.ax.set(xlim=(np.min(mz), 0.5 * np.max(mz)), xlabel='m/z', ylabel='Counts')
+                        self.ui.mass_spectrum.canvas.ax.legend(loc='best')
                         self.ui.mass_spectrum.canvas.draw()
 
                     # Selecting the electron image based on which location of the plot has been clicked
