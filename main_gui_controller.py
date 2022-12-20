@@ -8,6 +8,7 @@ import file_browser
 import dynamiq_import
 import hvc_controller
 import motor_controller
+import LabViewCommunication
 
 from time import sleep
 from PyQt5 import QtWidgets
@@ -50,9 +51,11 @@ class Controller:
         # The buttons and their functions
         self.ui.injector_settings_button.clicked.connect(self.open_injector_window)
         self.ui.microGC_settings_button.clicked.connect(self.open_micro_gc_window)
+        self.ui.disconnect_button_labview.clicked.connect(self.disconnect_labview)
+        self.ui.send_button_labview.clicked.connect(self.send_message_labview)
         self.ui.sequence_number.valueChanged.connect(self.sequence_selection)
         self.ui.motor_settings_button.clicked.connect(self.open_motor_window)
-        self.ui.connect_labview_button.clicked.connect(self.labview_connect)
+        self.ui.connect_button_labview.clicked.connect(self.connect_labview)
         self.ui.reset_chromatogram.clicked.connect(self.reset_chromatograms)
         self.ui.hvc_settings_button.clicked.connect(self.open_hvc_window)
         self.ui.chromatogram_table.clicked.connect(self.table_click)
@@ -125,30 +128,63 @@ class Controller:
         self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
         self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
 
-    def labview_connect(self):
+    # Connect to the LabView script and send a start message
+    def connect_labview(self):
         try:
-            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_address = ('localhost', 6340)
-            client.connect(server_address)
-            message = self.ui.connect_labview_line.text()
-            client.send(message.encode('utf-8'))
-            client.close()
+            # Connecting to the TCP listen (Labview)
+            self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client.connect(('localhost', 6340))
 
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.bind(('localhost', 6350))
-            server.listen(1)
+            # Sending message 'start'
+            self.client.sendall('START'.encode('utf-8'))
+            self.client.close()
 
-            receive, adr = server.accept()
-            cmnd = receive.recv(12)
-            print(cmnd)
-            server.close()
+            self.ui.connect_button_labview.setEnabled(False)
+            self.ui.disconnect_button_labview.setEnabled(True)
+            self.ui.send_button_labview.setEnabled(True)
 
         except Exception as e:
             print(e)
 
-    # The function to select a sequence on the microGC
-    def sequence_selection(self):
-        self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
+    # Disconnect from the LabView script and send
+    def disconnect_labview(self):
+        try:
+            # Connecting to the TCP listen (Labview)
+            self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client.connect(('localhost', 6340))
+
+            # Sending message 'start'
+            self.client.sendall('STOP'.encode('utf-8'))
+            self.client.close()
+
+            self.ui.disconnect_button_labview.setEnabled(False)
+            self.ui.connect_button_labview.setEnabled(True)
+            self.ui.send_button_labview.setEnabled(False)
+
+        except Exception as e:
+            print(e)
+
+    # Send a message to the LabView script when connected
+    def send_message_labview(self):
+        self.client_message = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_message.connect(('localhost', 6340))
+
+        indicator = self.ui.indicator_line.text()
+        command = self.ui.command_line.text()
+        payload = self.ui.payload_double.value()
+
+        if len(indicator) < 32 and len(command) < 32:
+            indicator_message = LabViewCommunication.ascii_message(indicator)
+            command_message = LabViewCommunication.ascii_message(command)
+            payload_message = LabViewCommunication.pack_payload(payload)
+
+            message = indicator_message + command_message + payload_message
+            self.client_message.sendall(message)
+
+        self.client_message.close()
+
+        if command == 'STOP':
+            self.disconnect_labview()
 
     # The function to start the data acquisition
     def start(self):
@@ -193,6 +229,13 @@ class Controller:
         self.ui.stop_button.setEnabled(False)
         check = False
         self.ui.microGC_status.setText('Run cancelled')
+
+    # The function to open a file
+    def open_file(self):
+        self.MainWindow.close()
+        self.fileBrowserWidget = file_browser.FileBrowserController(open_file=True, main=True)
+        self.fileBrowserWidget.show()
+        self.fileBrowserWidget.set_path()
 
     # The function to check the connection of the machines
     def refresh(self):
@@ -248,6 +291,10 @@ class Controller:
                 self.ui.load_button.setEnabled(True)
                 check = False
             self.client.close()
+
+    # The function to select a sequence on the microGC
+    def sequence_selection(self):
+        self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
 
     # The function to load in data from the connected machines
     def load_data(self):
@@ -661,13 +708,6 @@ class Controller:
     # The function to open the motor window
     def open_motor_window(self):
         self.window_motor = motor_controller.MotorController()
-
-    # The function to open a file
-    def open_file(self):
-        self.MainWindow.close()
-        self.fileBrowserWidget = file_browser.FileBrowserController(open_file=True, main=True)
-        self.fileBrowserWidget.show()
-        self.fileBrowserWidget.set_path()
 
 
 # The hard workers, also known as the threads

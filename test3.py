@@ -34,3 +34,68 @@
 #
 # # Display graph
 # plt.show()
+import struct
+
+
+def ascii_message(text):
+    if len(text) < 32:
+        amount_null = 32 - len(text)
+        message = text + amount_null * ' '
+        message = message.encode('ascii')
+        return message
+    else:
+        print('The text is too long, maximum of 32 characters')
+
+
+# For more information on what format to use in pack: https://docs.python.org/3/library/struct.html
+def pack_payload(value):
+    """
+    Packing the value to the corresponding bytes type and size
+    """
+    if isinstance(value, float):
+        value = struct.pack('!d', value)
+    elif isinstance(value, int):
+        value = struct.pack('!i', value)
+    elif isinstance(value, bool):
+        value = struct.pack('!?', value)
+    return value
+
+
+def unpack_payload(value, sort):
+    """
+    Unpacking the byte(s) to their corresponding value
+    """
+    if isinstance(sort, float):
+        value = struct.unpack('!d', value)
+    elif isinstance(sort, int):
+        value = struct.unpack('!i', value)
+    elif isinstance(sort, bool):
+        value = struct.unpack('!?', value)
+    return value
+
+
+indicator = 'SCAN'
+command = 'START'
+payload = 1022.2
+
+print(indicator)
+print(command)
+print(payload, '\n')
+
+indicator_message = ascii_message(indicator)
+command_message = ascii_message(command)
+payload_message = pack_payload(payload)
+
+print(indicator_message)
+print(command_message)
+print(payload_message, '\n')
+
+message = indicator_message + command_message + payload_message
+
+labview_indicator = message[:32].decode('ascii')
+labview_command = message[32:64].decode('ascii')
+labview_payload = unpack_payload(message[64:], payload)
+
+print(labview_indicator)
+print(labview_command)
+print(labview_payload[0])

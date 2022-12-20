@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1896</width>
-    <height>1084</height>
+    <height>1025</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,13 +52,13 @@
       <rect>
        <x>20</x>
        <y>20</y>
-       <width>111</width>
+       <width>201</width>
        <height>41</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>14</pointsize>
+       <pointsize>20</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
@@ -91,9 +91,9 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>880</y>
-       <width>91</width>
+       <x>30</x>
+       <y>890</y>
+       <width>81</width>
        <height>51</height>
       </rect>
      </property>
@@ -143,29 +143,6 @@
      </property>
      <property name="text">
       <string>START</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="load_button">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>130</x>
-       <y>820</y>
-       <width>91</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>13</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>LOAD</string>
      </property>
     </widget>
     <widget class="QPushButton" name="hvc_settings_button">
@@ -228,7 +205,7 @@
        <x>20</x>
        <y>680</y>
        <width>201</width>
-       <height>131</height>
+       <height>201</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -348,26 +325,49 @@
        <number>1</number>
       </property>
      </widget>
-    </widget>
-    <widget class="QPushButton" name="refresh_button">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>820</y>
-       <width>91</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>13</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Refresh</string>
-     </property>
+     <widget class="QPushButton" name="refresh_button">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>140</y>
+        <width>81</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Refresh</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="load_button">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>140</y>
+        <width>81</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>LOAD</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QPushButton" name="stop_button">
      <property name="enabled">
@@ -376,8 +376,8 @@
      <property name="geometry">
       <rect>
        <x>130</x>
-       <y>880</y>
-       <width>91</width>
+       <y>890</y>
+       <width>81</width>
        <height>51</height>
       </rect>
      </property>
@@ -429,28 +429,174 @@
       <string>STOP</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="connect_labview_button">
+    <widget class="QFrame" name="frame_3">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>650</y>
+       <y>470</y>
        <width>201</width>
-       <height>23</height>
+       <height>201</height>
       </rect>
      </property>
-     <property name="text">
-      <string>Connect labview</string>
+     <property name="frameShape">
+      <enum>QFrame::WinPanel</enum>
      </property>
-    </widget>
-    <widget class="QLineEdit" name="connect_labview_line">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>620</y>
-       <width>201</width>
-       <height>20</height>
-      </rect>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
      </property>
+     <widget class="QFrame" name="frame_2">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>40</y>
+        <width>91</width>
+        <height>151</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <widget class="QLineEdit" name="indicator_line">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>71</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>0</y>
+         <width>55</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Indicator</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="command_line">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>71</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>61</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Command</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>61</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Payload</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="payload_double">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>120</y>
+         <width>71</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="connect_button_labview">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Connect</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="disconnect_button_labview">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Disconnect</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="send_button_labview">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>160</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Send</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="microGC_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>181</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Mass Spectrometer</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
