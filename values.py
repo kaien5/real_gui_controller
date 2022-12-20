@@ -10,5 +10,5 @@ standard_hvc_settings = {"ip address": "0.0.0.0", "connection name 1": "Nozzle",
 
 standard_microGC_settings = {"Column temperature": "0", "Column carrier pressure": "0", "Injection temperature": "0",
                              "Method name": "", "Heated sample line temp": "0", "Injection time": "0", "Analysis time": "0",
-                             "Back-flush time": "0", "Cycle time": "0", "# of analysis per sequence": "0", "Rate": ["0.0", "0.0", "0.0"],
-                             "Final temp": ["0.0", "0.0", "0.0"], "Hold time": ["0.0", "0.0", "0.0"]}
+                             "Back-flush time": "0", "Cycle time": "0", "# of analysis per sequence": "0", "Rate": ["0.0", "10.0", "5.0"],
+                             "Final temp": ["20.0", "180.0", "250.0"], "Hold time": ["0.0", "30.0", "0.0"]}

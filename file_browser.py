@@ -1,7 +1,5 @@
 import json
 import numpy as np
-from PyQt5.QtCore import QDir
-
 import hvc_controller
 import main_gui_controller
 import microGC_controller

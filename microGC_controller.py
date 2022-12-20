@@ -1,12 +1,11 @@
 import struct
-
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QTableWidgetItem
-from pymodbus.client.sync import ModbusTcpClient
-from microGC import Ui_microGC_settings
-
 import values as v
 import file_browser
+
+from PyQt5 import QtWidgets
+from microGC import Ui_microGC_settings
+from PyQt5.QtWidgets import QTableWidgetItem
+from pymodbus.client.sync import ModbusTcpClient
 
 
 class MicroGcController:

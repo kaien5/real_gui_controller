@@ -1,8 +1,7 @@
-# This is an example script for analyzing TOF-MS data
-
 import numpy as np
-from scipy import optimize
 import matplotlib.pyplot as plt
+
+from scipy import optimize
 from jcamp import JCAMP_reader
 
 

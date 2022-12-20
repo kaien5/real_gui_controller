@@ -1,6 +1,5 @@
 import os
 import socket
-
 import h5py
 import struct
 import numpy as np
@@ -8,12 +7,11 @@ import file_browser
 import dynamiq_import
 import hvc_controller
 import motor_controller
-import LabViewCommunication
+import labviewcommunication
+import tof_ms_analysis as tof
 
 from time import sleep
 from PyQt5 import QtWidgets
-
-import tof_ms_analysis as tof
 from main_gui import Ui_MainWindow
 from pymodbus.constants import Endian
 from pymodbus.client.sync import ModbusTcpClient
@@ -174,9 +172,9 @@ class Controller:
         payload = self.ui.payload_double.value()
 
         if len(indicator) < 32 and len(command) < 32:
-            indicator_message = LabViewCommunication.ascii_message(indicator)
-            command_message = LabViewCommunication.ascii_message(command)
-            payload_message = LabViewCommunication.pack_payload(payload)
+            indicator_message = labviewcommunication.ascii_message(indicator)
+            command_message = labviewcommunication.ascii_message(command)
+            payload_message = labviewcommunication.pack_payload(payload)
 
             message = indicator_message + command_message + payload_message
             self.client_message.sendall(message)
