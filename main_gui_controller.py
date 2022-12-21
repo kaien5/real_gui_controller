@@ -5,8 +5,6 @@ import struct
 import numpy as np
 import file_browser
 import dynamiq_import
-import hvc_controller
-import motor_controller
 import labviewcommunication
 import tof_ms_analysis as tof
 
@@ -17,7 +15,6 @@ from pymodbus.constants import Endian
 from pymodbus.client.sync import ModbusTcpClient
 from microGC_controller import MicroGcController
 from pymodbus.payload import BinaryPayloadDecoder
-from injector_controller import Injector_controller
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
 check = True
@@ -47,15 +44,12 @@ class Controller:
         self.MainWindow.showMaximized()
 
         # The buttons and their functions
-        self.ui.injector_settings_button.clicked.connect(self.open_injector_window)
         self.ui.microGC_settings_button.clicked.connect(self.open_micro_gc_window)
         self.ui.disconnect_button_labview.clicked.connect(self.disconnect_labview)
         self.ui.send_button_labview.clicked.connect(self.send_message_labview)
         self.ui.sequence_number.valueChanged.connect(self.sequence_selection)
-        self.ui.motor_settings_button.clicked.connect(self.open_motor_window)
         self.ui.connect_button_labview.clicked.connect(self.connect_labview)
         self.ui.reset_chromatogram.clicked.connect(self.reset_chromatograms)
-        self.ui.hvc_settings_button.clicked.connect(self.open_hvc_window)
         self.ui.chromatogram_table.clicked.connect(self.table_click)
         self.ui.action_Open.triggered.connect(self.open_file)
         self.ui.refresh_button.clicked.connect(self.refresh)
@@ -691,22 +685,9 @@ class Controller:
         self.ui.Ch2_FF.canvas.draw()
         self.ui.Ch2_BF.canvas.draw()
 
-    # The function to open the injector window
-    def open_injector_window(self):
-        self.window_in = Injector_controller()
-
     # The function to open the micro GC window
     def open_micro_gc_window(self):
         self.window_GC = MicroGcController()
-
-    # The function to open the hvc window
-    def open_hvc_window(self):
-        self.window_hvc = hvc_controller.HvcController()
-
-    # The function to open the motor window
-    def open_motor_window(self):
-        self.window_motor = motor_controller.MotorController()
-
 
 # The hard workers, also known as the threads
 class Worker1(QObject):
