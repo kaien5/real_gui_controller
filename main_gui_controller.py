@@ -15,7 +15,9 @@ from pymodbus.constants import Endian
 from pymodbus.client.sync import ModbusTcpClient
 from microGC_controller import MicroGcController
 from pymodbus.payload import BinaryPayloadDecoder
+from warning_window_controller import WarningWindow
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
+
 
 check = True
 
@@ -124,42 +126,42 @@ class Controller:
     def connect_labview(self):
         try:
             # Connecting to the TCP listen (Labview)
-            self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.client.connect(('localhost', 6340))
+            self.labview_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.labview_client.connect(('localhost', 6340))
 
             # Sending message 'start'
-            self.client.sendall('START'.encode('utf-8'))
-            self.client.close()
+            self.labview_client.sendall('START'.encode('utf-8'))
+            self.labview_client.close()
 
             self.ui.connect_button_labview.setEnabled(False)
             self.ui.disconnect_button_labview.setEnabled(True)
             self.ui.send_button_labview.setEnabled(True)
 
         except Exception as e:
-            print(e)
+            self.warning_window = WarningWindow(text=e)
 
     # Disconnect from the LabView script and send
     def disconnect_labview(self):
         try:
             # Connecting to the TCP listen (Labview)
-            self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.client.connect(('localhost', 6340))
+            self.labview_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.labview_client.connect(('localhost', 6340))
 
             # Sending message 'start'
-            self.client.sendall('STOP'.encode('utf-8'))
-            self.client.close()
+            self.labview_client.sendall('STOP'.encode('utf-8'))
+            self.labview_client.close()
 
             self.ui.disconnect_button_labview.setEnabled(False)
             self.ui.connect_button_labview.setEnabled(True)
             self.ui.send_button_labview.setEnabled(False)
 
         except Exception as e:
-            print(e)
+            self.warning_window = WarningWindow(text=e)
 
     # Send a message to the LabView script when connected
     def send_message_labview(self):
-        self.client_message = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_message.connect(('localhost', 6340))
+        self.labview_client_message = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.labview_client_message.connect(('localhost', 6340))
 
         indicator = self.ui.indicator_line.text()
         command = self.ui.command_line.text()
@@ -171,9 +173,9 @@ class Controller:
             payload_message = labviewcommunication.pack_payload(payload)
 
             message = indicator_message + command_message + payload_message
-            self.client_message.sendall(message)
+            self.labview_client_message.sendall(message)
 
-        self.client_message.close()
+        self.labview_client_message.close()
 
         if command == 'STOP':
             self.disconnect_labview()
@@ -564,7 +566,7 @@ class Controller:
                         self.ui.electron_image.canvas.draw()
 
                 except Exception as e:
-                    print(f'Click inside the boundaries of the plot. {e}')
+                    self.warning_window = WarningWindow(text=e)
 
         # The zoom in function per graph
         if self.ui.zoom_box.isChecked():
@@ -611,7 +613,7 @@ class Controller:
                         pass
 
             except Exception as e:
-                print(f'Zoom inside of the boundaries of the plot. {e}')
+                self.warning_window = WarningWindow(text=e)
 
     # The function to apply a line
     def line(self):
@@ -688,6 +690,7 @@ class Controller:
     # The function to open the micro GC window
     def open_micro_gc_window(self):
         self.window_GC = MicroGcController()
+
 
 # The hard workers, also known as the threads
 class Worker1(QObject):

@@ -7,6 +7,8 @@ import microGC_controller
 from os import getcwd
 from PyQt5 import QtCore, QtWidgets
 
+from warning_window_controller import WarningWindow
+
 
 class FileBrowserController(QtWidgets.QMainWindow):
     def __init__(self, save_file=False, open_file=False, microGC=False, hvc=False, main=False, hvc_data=None, microGC_data=None):
@@ -134,7 +136,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
                 self.window_hvc = hvc_controller.HvcController(file=True, data=hvc_settings)
                 print(f'File {open_filename} is opened')
         except Exception as e:
-            print(e)
+            self.warning_window = WarningWindow(text=e)
         self.close()
 
     # This function will save the microGC settings in a json file
@@ -154,7 +156,7 @@ class FileBrowserController(QtWidgets.QMainWindow):
                 self.window_GC = microGC_controller.MicroGcController(file=True, data=microGC_settings)
                 print(f'File {open_filename} is opened')
         except Exception as e:
-            print(e)
+            self.warning_window = WarningWindow(text=e)
         self.close()
 
     # This function will open the main window with a selected file
@@ -169,5 +171,5 @@ class FileBrowserController(QtWidgets.QMainWindow):
             data = [test_file_time, Ch1_FF, Ch2_FF, Ch3_BF]
             self.MainWindow = main_gui_controller.Controller(load=True, data=data)
         except Exception as e:
-            print(e)
+            self.warning_window = WarningWindow(text=e)
         self.close()

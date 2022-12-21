@@ -6,6 +6,7 @@ from PyQt5 import QtWidgets
 from microGC import Ui_microGC_settings
 from PyQt5.QtWidgets import QTableWidgetItem
 from pymodbus.client.sync import ModbusTcpClient
+from warning_window_controller import WarningWindow
 
 
 class MicroGcController:
@@ -92,7 +93,7 @@ class MicroGcController:
             self.client.close()
 
         except Exception as e:
-            print(e)
+            self.warning_window = WarningWindow(text=e)
 
     # Opening the save file browser and supplying the settings
     def save_file_browser(self):
@@ -130,7 +131,7 @@ class MicroGcController:
             self.fileBrowserWidget.set_path()
 
         except Exception as e:
-            print(f'All fields must contain data. Error: {e}')
+            self.warning_window = WarningWindow(text=e)
 
     # Opening the file browser
     def open_file_browser(self):
@@ -170,7 +171,7 @@ class MicroGcController:
             self.ui_GC.total_time.setText(str(round(time_trajectory[-1], 2)))
 
         except Exception as e:
-            print(f'All fields must contain data. Error: {e}')
+            self.warning_window = WarningWindow(text=e)
 
     # Adds a row in the table
     def add_row(self):
