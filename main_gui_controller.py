@@ -76,12 +76,14 @@ class Controller:
         self.ui.Ch2_BF.canvas.fig.suptitle('Ch2 (BF)')
         self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
         self.ui.electron_image.canvas.fig.suptitle('Electron image')
-        self.ui.Ch1_FF.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
-        self.ui.Ch1_FF.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
-        self.ui.Ch2_FF.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
-        self.ui.Ch2_FF.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
-        self.ui.Ch2_BF.canvas.fig.text(0.84, 0.05, 'Retention time (min)', ha='center', va='center')
-        self.ui.Ch2_BF.canvas.fig.text(0.09, 0.5, 'Intensity', ha='center', va='center', rotation='vertical')
+
+        # The labels of the axes
+        self.ui.Ch1_FF.canvas.ax.set_xlabel('Retention time (min)')
+        self.ui.Ch1_FF.canvas.ax.set_ylabel('Intensity')
+        self.ui.Ch2_FF.canvas.ax.set_xlabel('Retention time (min)')
+        self.ui.Ch2_FF.canvas.ax.set_ylabel('Intensity')
+        self.ui.Ch2_BF.canvas.ax.set_xlabel('Retention time (min)')
+        self.ui.Ch2_BF.canvas.ax.set_ylabel('Intensity')
 
         # Disabling the plots at start up
         self.ui.Ch1_FF.setEnabled(False)
@@ -431,6 +433,14 @@ class Controller:
             self.ui.mass_spectrum.canvas.ax.clear()
             self.ui.electron_image.canvas.ax.clear()
 
+            # Labeling the axes
+            self.ui.Ch1_FF.canvas.ax.set_xlabel('Retention time (min)')
+            self.ui.Ch1_FF.canvas.ax.set_ylabel('Intensity')
+            self.ui.Ch2_FF.canvas.ax.set_xlabel('Retention time (min)')
+            self.ui.Ch2_FF.canvas.ax.set_ylabel('Intensity')
+            self.ui.Ch2_BF.canvas.ax.set_xlabel('Retention time (min)')
+            self.ui.Ch2_BF.canvas.ax.set_ylabel('Intensity')
+
             # Plotting the data and brackets
             self.ui.Ch1_FF.canvas.ax.plot(self.time, self.Ch1_FF, 'b')
             self.ui.Ch2_FF.canvas.ax.plot(self.time, self.Ch2_FF, 'b')
@@ -563,6 +573,7 @@ class Controller:
                         electron_list = list(f.keys())[0]
                         electron_images = f[electron_list][()]
                         self.ui.electron_image.canvas.ax.imshow(electron_images[picture_nr])
+                        self.ui.electron_image.canvas.ax.axis('off')
                         self.ui.electron_image.canvas.draw()
 
                 except Exception as e:

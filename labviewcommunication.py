@@ -4,7 +4,7 @@ import struct
 def ascii_message(text):
     if len(text) < 32:
         amount_null = 32 - len(text)
-        message = text + amount_null * ' '
+        message = text.upper() + amount_null * ' '
         message = message.encode('ascii')
         return message
 

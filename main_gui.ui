@@ -18,64 +18,26 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>30</y>
+      <y>10</y>
       <width>241</width>
-      <height>961</height>
+      <height>981</height>
      </rect>
     </property>
     <property name="frameShape">
-     <enum>QFrame::WinPanel</enum>
+     <enum>QFrame::Box</enum>
     </property>
     <property name="frameShadow">
      <enum>QFrame::Plain</enum>
     </property>
-    <widget class="QLabel" name="settings_label">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>201</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>20</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Settings</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="microGC_settings_button">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>600</y>
-       <width>201</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>14</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>MicroGC information</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="start_button">
      <property name="enabled">
       <bool>false</bool>
      </property>
      <property name="geometry">
       <rect>
-       <x>30</x>
+       <x>20</x>
        <y>900</y>
-       <width>81</width>
+       <width>91</width>
        <height>51</height>
       </rect>
      </property>
@@ -131,9 +93,9 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>690</y>
+       <y>420</y>
        <width>201</width>
-       <height>201</height>
+       <height>271</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -210,7 +172,7 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>14</pointsize>
+        <pointsize>13</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -264,7 +226,7 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>13</pointsize>
+        <pointsize>12</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -287,13 +249,34 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>13</pointsize>
+        <pointsize>12</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
       <property name="text">
        <string>LOAD</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="microGC_settings_button">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>200</y>
+        <width>181</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>MicroGC information</string>
       </property>
      </widget>
     </widget>
@@ -305,7 +288,7 @@
       <rect>
        <x>130</x>
        <y>900</y>
-       <width>81</width>
+       <width>91</width>
        <height>51</height>
       </rect>
      </property>
@@ -361,9 +344,9 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>120</y>
+       <y>20</y>
        <width>201</width>
-       <height>281</height>
+       <height>321</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -376,7 +359,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>80</y>
+        <y>100</y>
         <width>181</width>
         <height>151</height>
        </rect>
@@ -395,6 +378,20 @@
          <width>161</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="maxLength">
+        <number>32</number>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QLabel" name="label">
@@ -418,6 +415,20 @@
          <width>161</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="maxLength">
+        <number>32</number>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QLabel" name="label_2">
@@ -455,6 +466,20 @@
          <height>22</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+       <property name="minimum">
+        <double>-1000.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
       </widget>
      </widget>
      <widget class="QPushButton" name="connect_button_labview">
@@ -463,8 +488,15 @@
         <x>10</x>
         <y>40</y>
         <width>81</width>
-        <height>31</height>
+        <height>51</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="text">
        <string>Connect</string>
@@ -479,8 +511,15 @@
         <x>110</x>
         <y>40</y>
         <width>81</width>
-        <height>31</height>
+        <height>51</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="text">
        <string>Disconnect</string>
@@ -493,13 +532,20 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>240</y>
+        <y>260</y>
         <width>181</width>
-        <height>31</height>
+        <height>51</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="text">
-       <string>Send</string>
+       <string>Send Message</string>
       </property>
      </widget>
      <widget class="QLabel" name="microGC_2">
@@ -513,7 +559,7 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>14</pointsize>
+        <pointsize>13</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -525,24 +571,6 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-    </widget>
-    <widget class="QCheckBox" name="enable_plots">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>60</y>
-       <width>201</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>18</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Enable Plots</string>
-     </property>
     </widget>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
@@ -570,7 +598,7 @@
         <x>0</x>
         <y>0</y>
         <width>1591</width>
-        <height>381</height>
+        <height>371</height>
        </rect>
       </property>
      </widget>
@@ -707,7 +735,7 @@
     <property name="geometry">
      <rect>
       <x>1800</x>
-      <y>40</y>
+      <y>80</y>
       <width>93</width>
       <height>28</height>
      </rect>
@@ -726,8 +754,8 @@
    <widget class="QCheckBox" name="zoom_box">
     <property name="geometry">
      <rect>
-      <x>1810</x>
-      <y>70</y>
+      <x>1800</x>
+      <y>130</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -747,8 +775,8 @@
    <widget class="QCheckBox" name="line_box">
     <property name="geometry">
      <rect>
-      <x>1810</x>
-      <y>90</y>
+      <x>1800</x>
+      <y>150</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -760,6 +788,24 @@
     </property>
     <property name="text">
      <string>Line</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="enable_plots">
+    <property name="geometry">
+     <rect>
+      <x>1800</x>
+      <y>110</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Enable plots</string>
     </property>
    </widget>
   </widget>
