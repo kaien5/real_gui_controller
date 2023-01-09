@@ -1,4 +1,3 @@
-import os
 import socket
 import h5py
 import struct
@@ -24,19 +23,32 @@ check = True
 
 class Controller:
     def __init__(self, load=False, data=None):
+        # Don't ask me why, but PyCharm wants this...
+        self.x1 = None
+        self.x2 = None
+        self.y1 = None
+        self.y2 = None
         self.wait = None
         self.client = None
         self.loaded = False
         self.worker1 = None
         self.thread1 = None
+        self.brackets = None
         self.filename = None
         self.window_in = None
         self.window_GC = None
         self.window_hvc = None
         self.first_click = True
         self.window_motor = None
+        self.compound_data = None
+        self.labview_client = None
+        self.compound_names = None
+        self.warning_window = None
         self.sequence_names = None
         self.fileBrowserWidget = None
+        self.labview_client_message = None
+
+        # The MainWindow setup
         self.MainWindow = QtWidgets.QMainWindow()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self.MainWindow)
@@ -50,11 +62,11 @@ class Controller:
         self.ui.disconnect_button_labview.clicked.connect(self.disconnect_labview)
         self.ui.send_button_labview.clicked.connect(self.send_message_labview)
         self.ui.sequence_number.valueChanged.connect(self.sequence_selection)
+        self.ui.connect_button_micro_GC.clicked.connect(self.connect_micro_GC)
         self.ui.connect_button_labview.clicked.connect(self.connect_labview)
         self.ui.reset_chromatogram.clicked.connect(self.reset_chromatograms)
         self.ui.chromatogram_table.clicked.connect(self.table_click)
         self.ui.action_Open.triggered.connect(self.open_file)
-        self.ui.refresh_button.clicked.connect(self.refresh)
         self.ui.load_button.clicked.connect(self.load_data)
         self.ui.start_button.clicked.connect(self.start)
         self.ui.enable_plots.toggled.connect(self.plots)
@@ -70,21 +82,6 @@ class Controller:
         self.ui.Ch2_BF.canvas.mpl_connect('button_press_event', self.plot_click)
         self.ui.Ch2_BF.canvas.mpl_connect('button_release_event', self.plot_click)
 
-        # The chromatogram and mass spectrum settings
-        self.ui.Ch1_FF.canvas.fig.suptitle('Ch1 (FF)')
-        self.ui.Ch2_FF.canvas.fig.suptitle('Ch2 (FF)')
-        self.ui.Ch2_BF.canvas.fig.suptitle('Ch2 (BF)')
-        self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
-        self.ui.electron_image.canvas.fig.suptitle('Electron image')
-
-        # The labels of the axes
-        self.ui.Ch1_FF.canvas.ax.set_xlabel('Retention time (min)')
-        self.ui.Ch1_FF.canvas.ax.set_ylabel('Intensity')
-        self.ui.Ch2_FF.canvas.ax.set_xlabel('Retention time (min)')
-        self.ui.Ch2_FF.canvas.ax.set_ylabel('Intensity')
-        self.ui.Ch2_BF.canvas.ax.set_xlabel('Retention time (min)')
-        self.ui.Ch2_BF.canvas.ax.set_ylabel('Intensity')
-
         # Disabling the plots at start up
         self.ui.Ch1_FF.setEnabled(False)
         self.ui.Ch2_FF.setEnabled(False)
@@ -92,37 +89,33 @@ class Controller:
         self.ui.mass_spectrum.setEnabled(False)
         self.ui.electron_image.setEnabled(False)
 
-        # Load data from supplied file, else demo file
+        # Load data from supplied file
         if load:
+            self.ui.enable_plots.setEnabled(True)
+
             self.time = data[0]
             self.Ch1_FF = data[1]
             self.Ch2_FF = data[2]
             self.Ch2_BF = data[3]
-
-        else:
-            file_name = os.getcwd() + '/Data/Demo_file.txt'
-            self.ui.Ch1_FF.canvas.fig.suptitle('Demo Data')
-            self.ui.Ch2_FF.canvas.fig.suptitle('Demo Data')
-            self.ui.Ch2_BF.canvas.fig.suptitle('Demo Data')
-            self.ui.mass_spectrum.canvas.fig.suptitle('Demo Data')
-            self.ui.electron_image.canvas.fig.suptitle('Demo Data')
-            self.time = np.loadtxt(file_name, skiprows=3, usecols=0)
-            self.Ch1_FF = np.loadtxt(file_name, skiprows=3, usecols=1)
-            self.Ch2_FF = np.loadtxt(file_name, skiprows=3, usecols=2)
-            self.Ch2_BF = np.loadtxt(file_name, skiprows=3, usecols=3)
-
-        self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch1_FF_x2 = max(self.time) + max(self.time) * 0.05
-        self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch2_FF_x2 = max(self.time) + max(self.time) * 0.05
-        self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
-        self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
-        self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
-        self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
-        self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
-        self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
-        self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x2 = max(self.time) + max(self.time) * 0.05
+            self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch2_FF_x2 = max(self.time) + max(self.time) * 0.05
+            self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
+            self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
+            self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
+            self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
+            self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
+            self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
+            self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
 
     # Connect to the LabView script and send a start message
     def connect_labview(self):
@@ -194,7 +187,7 @@ class Controller:
             self.client.write_register(0x9D0A, 0x0001)  # Stop all queued sequences
             self.client.write_register(0x9C41, self.ui.sequence_number.value())
             self.client.write_register(0x9D08, 0x0001)
-            self.ui.refresh_button.setEnabled(False)
+            self.ui.connect_button_micro_GC.setEnabled(False)
             self.ui.start_button.setEnabled(False)
             self.ui.load_button.setEnabled(False)
 
@@ -219,8 +212,8 @@ class Controller:
         global check
         self.client.write_register(0x9D0A, 1)
         self.client.close()
-        self.ui.refresh_button.setEnabled(False)
-        self.ui.refresh_button.setEnabled(True)
+        self.ui.connect_button_micro_GC.setEnabled(False)
+        self.ui.connect_button_micro_GC.setEnabled(True)
         self.ui.start_button.setEnabled(True)
         self.ui.stop_button.setEnabled(False)
         check = False
@@ -234,7 +227,7 @@ class Controller:
         self.fileBrowserWidget.set_path()
 
     # The function to check the connection of the machines
-    def refresh(self):
+    def connect_micro_GC(self):
         try:
             microGC_ip = self.ui.ip_address_microGC.text()
             self.client = ModbusTcpClient(host=microGC_ip, port='502')
@@ -256,8 +249,9 @@ class Controller:
             self.ui.sequence_label.setText(self.sequence_names['Sequence ' + str(self.ui.sequence_number.value())])
 
             # Enabling some buttons
-            self.ui.start_button.setEnabled(True)
+            self.ui.microGC_settings_button.setEnabled(True)
             self.ui.sequence_number.setEnabled(True)
+            self.ui.start_button.setEnabled(True)
             self.ui.load_button.setEnabled(True)
 
         except:
@@ -281,7 +275,7 @@ class Controller:
                 self.ui.stop_button.setEnabled(True)
             else:
                 self.ui.microGC_status.setText('Done')
-                self.ui.refresh_button.setEnabled(True)
+                self.ui.connect_button_micro_GC.setEnabled(True)
                 self.ui.stop_button.setEnabled(False)
                 self.ui.start_button.setEnabled(True)
                 self.ui.load_button.setEnabled(True)
@@ -296,6 +290,9 @@ class Controller:
     def load_data(self):
         # Communicating to the plot function
         self.loaded = True
+
+        # Enabling the plot enable button
+        self.ui.enable_plots.setEnabled(True)
 
         # Connect to the IP written in the text line
         microGC_ip = self.ui.ip_address_microGC.text()
@@ -377,13 +374,6 @@ class Controller:
                 end = x2, y
                 self.brackets[self.compound_names[i]] = begin, end
 
-        # Changing titles of the plots
-        self.ui.Ch1_FF.canvas.fig.suptitle('Ch1 (FF)')
-        self.ui.Ch2_FF.canvas.fig.suptitle('Ch2 (FF)')
-        self.ui.Ch2_BF.canvas.fig.suptitle('Ch2 (BF)')
-        self.ui.mass_spectrum.canvas.fig.suptitle('Mass spectrum')
-        self.ui.electron_image.canvas.fig.suptitle('Electron image')
-
         # The data for the plots
         self.time = np.loadtxt(str(self.filename), skiprows=3, usecols=0)
         self.Ch1_FF = np.loadtxt(str(self.filename), skiprows=3, usecols=1)
@@ -427,11 +417,12 @@ class Controller:
             self.ui.Ch1_FF.canvas.ax.clear()
             self.ui.Ch2_FF.canvas.ax.clear()
             self.ui.Ch2_BF.canvas.ax.clear()
+            self.ui.mass_spectrum.canvas.ax.clear()
+            self.ui.electron_image.canvas.ax.clear()
+
             self.ui.Ch1_FF.canvas.fig.texts.clear()
             self.ui.Ch2_FF.canvas.fig.texts.clear()
             self.ui.Ch2_BF.canvas.fig.texts.clear()
-            self.ui.mass_spectrum.canvas.ax.clear()
-            self.ui.electron_image.canvas.ax.clear()
 
             # Labeling the axes
             self.ui.Ch1_FF.canvas.ax.set_xlabel('Retention time (min)')
@@ -440,6 +431,13 @@ class Controller:
             self.ui.Ch2_FF.canvas.ax.set_ylabel('Intensity')
             self.ui.Ch2_BF.canvas.ax.set_xlabel('Retention time (min)')
             self.ui.Ch2_BF.canvas.ax.set_ylabel('Intensity')
+
+            # Showing the titles of the plots
+            self.ui.Ch1_FF.canvas.ax.set_title('Ch1 (FF)')
+            self.ui.Ch2_FF.canvas.ax.set_title('Ch2 (FF)')
+            self.ui.Ch2_BF.canvas.ax.set_title('Ch2 (BF)')
+            self.ui.mass_spectrum.canvas.ax.set_title('Mass spectrum')
+            self.ui.electron_image.canvas.ax.set_title('Electron image')
 
             # Plotting the data and brackets
             self.ui.Ch1_FF.canvas.ax.plot(self.time, self.Ch1_FF, 'b')
@@ -535,6 +533,7 @@ class Controller:
                     self.ui.Ch2_FF.canvas.draw()
                     self.ui.Ch2_BF.canvas.draw()
                     self.ui.mass_spectrum.canvas.ax.clear()
+                    self.ui.electron_image.canvas.ax.clear()
 
                     # Selecting the TOF file based on which location of the plot has been clicked
                     with h5py.File('Data/scan_example.h5', 'r') as f:
@@ -565,6 +564,7 @@ class Controller:
                         # The * 0.5 below is a temporary correction
                         self.ui.mass_spectrum.canvas.ax.set(xlim=(np.min(mz), 0.5 * np.max(mz)), xlabel='m/z', ylabel='Counts')
                         self.ui.mass_spectrum.canvas.ax.legend(loc='best')
+                        self.ui.mass_spectrum.canvas.ax.set_title('Mass spectrum')
                         self.ui.mass_spectrum.canvas.draw()
 
                     # Selecting the electron image based on which location of the plot has been clicked
@@ -574,6 +574,7 @@ class Controller:
                         electron_images = f[electron_list][()]
                         self.ui.electron_image.canvas.ax.imshow(electron_images[picture_nr])
                         self.ui.electron_image.canvas.ax.axis('off')
+                        self.ui.electron_image.canvas.ax.set_title('Electron image')
                         self.ui.electron_image.canvas.draw()
 
                 except Exception as e:

@@ -215,7 +215,7 @@
        <number>1</number>
       </property>
      </widget>
-     <widget class="QPushButton" name="refresh_button">
+     <widget class="QPushButton" name="connect_button_micro_GC">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -226,13 +226,13 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
       <property name="text">
-       <string>Refresh</string>
+       <string>Connect</string>
       </property>
      </widget>
      <widget class="QPushButton" name="load_button">
@@ -249,7 +249,7 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -272,7 +272,9 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>14</pointsize>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
        </font>
       </property>
       <property name="text">
@@ -598,7 +600,7 @@
         <x>0</x>
         <y>0</y>
         <width>1591</width>
-        <height>371</height>
+        <height>381</height>
        </rect>
       </property>
      </widget>
@@ -791,6 +793,9 @@
     </property>
    </widget>
    <widget class="QCheckBox" name="enable_plots">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>1800</x>
