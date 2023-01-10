@@ -86,6 +86,9 @@ class Controller:
         self.ui.mass_spectrum.setEnabled(False)
         self.ui.electron_image.setEnabled(False)
 
+        # Hiding the axis from the electron image
+        self.ui.electron_image.canvas.ax.axis('off')
+
         # Load data from supplied file
         if load:
             self.ui.enable_plots.setEnabled(True)
@@ -390,6 +393,9 @@ class Controller:
             self.ui.Ch2_BF.canvas.ax.clear(), self.ui.Ch2_BF.canvas.fig.texts.clear()
             self.ui.mass_spectrum.canvas.ax.clear(), self.ui.electron_image.canvas.ax.clear()
 
+            # Hiding the axis from the electron image
+            self.ui.electron_image.canvas.ax.axis('off')
+
             # Labeling the axes
             self.ui.Ch1_FF.canvas.ax.set_xlabel('Retention time (min)'), self.ui.Ch1_FF.canvas.ax.set_ylabel('Intensity')
             self.ui.Ch2_FF.canvas.ax.set_xlabel('Retention time (min)'), self.ui.Ch2_FF.canvas.ax.set_ylabel('Intensity')
@@ -410,8 +416,8 @@ class Controller:
             self.ui.Ch2_FF.canvas.ax.plot(self.time, self.Ch2_FF, 'b')
             self.ui.Ch2_BF.canvas.ax.plot(self.time, self.Ch2_BF, 'b')
 
+            # Enabling the chromatogram table
             if self.loaded:
-                # Enabling the chromatogram table
                 self.ui.chromatogram_table.setEnabled(True)
 
                 # The brackets
