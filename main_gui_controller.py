@@ -75,12 +75,9 @@ class Controller:
         self.ui.line_box.clicked.connect(self.line)
 
         # Clicked on functions
-        self.ui.Ch1_FF.canvas.mpl_connect('button_press_event', self.plot_click)
-        self.ui.Ch1_FF.canvas.mpl_connect('button_release_event', self.plot_click)
-        self.ui.Ch2_FF.canvas.mpl_connect('button_press_event', self.plot_click)
-        self.ui.Ch2_FF.canvas.mpl_connect('button_release_event', self.plot_click)
-        self.ui.Ch2_BF.canvas.mpl_connect('button_press_event', self.plot_click)
-        self.ui.Ch2_BF.canvas.mpl_connect('button_release_event', self.plot_click)
+        self.ui.Ch1_FF.canvas.mpl_connect('button_press_event', self.plot_click), self.ui.Ch1_FF.canvas.mpl_connect('button_release_event', self.plot_click)
+        self.ui.Ch2_FF.canvas.mpl_connect('button_press_event', self.plot_click), self.ui.Ch2_FF.canvas.mpl_connect('button_release_event', self.plot_click)
+        self.ui.Ch2_BF.canvas.mpl_connect('button_press_event', self.plot_click), self.ui.Ch2_BF.canvas.mpl_connect('button_release_event', self.plot_click)
 
         # Disabling the plots at start up
         self.ui.Ch1_FF.setEnabled(False)
@@ -93,29 +90,12 @@ class Controller:
         if load:
             self.ui.enable_plots.setEnabled(True)
 
-            self.time = data[0]
-            self.Ch1_FF = data[1]
-            self.Ch2_FF = data[2]
-            self.Ch2_BF = data[3]
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x2 = max(self.time) + max(self.time) * 0.05
-            self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch2_FF_x2 = max(self.time) + max(self.time) * 0.05
-            self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
-            self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
-            self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
-            self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
-            self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
-            self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
-            self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
+            self.time, self.Ch1_FF, self.Ch2_FF, self.Ch2_BF = data[0], data[1], data[2], data[3]
+            self.Ch1_FF_x1 = self.Ch2_FF_x1 = self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
+            self.Ch1_FF_x2 = self.Ch2_FF_x2 = self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
+            self.Ch1_FF_y1, self.Ch1_FF_y2 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05, max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
+            self.Ch2_FF_y1, self.Ch2_FF_y2 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05, max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
+            self.Ch2_BF_y1, self.Ch2_BF_y2 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05, max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
 
     # Connect to the LabView script and send a start message
     def connect_labview(self):
@@ -204,15 +184,15 @@ class Controller:
             self.worker1.progress1.connect(self.check_microGC)
             self.thread1.start()
 
-        except:
+        except Exception as e:
             self.ui.microGC_status.setText('Invalid IP Address')
+            self.warning_window = WarningWindow(text=e)
 
     # The function to stop data acquisition
     def stop(self):
         global check
         self.client.write_register(0x9D0A, 1)
         self.client.close()
-        self.ui.connect_button_micro_GC.setEnabled(False)
         self.ui.connect_button_micro_GC.setEnabled(True)
         self.ui.start_button.setEnabled(True)
         self.ui.stop_button.setEnabled(False)
@@ -254,8 +234,9 @@ class Controller:
             self.ui.start_button.setEnabled(True)
             self.ui.load_button.setEnabled(True)
 
-        except:
+        except Exception as e:
             self.ui.microGC_status.setText('No connection possible')
+            self.warning_window = WarningWindow(text=e)
 
     # This function is to check whether the MicroGC is busy
     def check_microGC(self):
@@ -381,18 +362,11 @@ class Controller:
         self.Ch2_BF = np.loadtxt(str(self.filename), skiprows=3, usecols=3)
 
         # The values for the x and y limit
-        self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch1_FF_x2 = max(self.time) + max(self.time) * 0.05
-        self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch2_FF_x2 = max(self.time) + max(self.time) * 0.05
-        self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
-        self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
-        self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
-        self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
-        self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
-        self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
-        self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
-        self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
+        self.Ch1_FF_x1 = self.Ch2_FF_x1 = self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
+        self.Ch1_FF_x2 = self.Ch2_FF_x2 = self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
+        self.Ch1_FF_y1, self.Ch1_FF_y2 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05, max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
+        self.Ch2_FF_y1, self.Ch2_FF_y2 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05, max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
+        self.Ch2_BF_y1, self.Ch2_BF_y2 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05, max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
 
         # Refreshing the plots
         if self.ui.enable_plots.isChecked():
@@ -407,30 +381,22 @@ class Controller:
     # The function to enable or disable the plots
     def plots(self, draw=True):
         if self.ui.enable_plots.checkState():
-            self.ui.Ch1_FF.setEnabled(True)
-            self.ui.Ch2_FF.setEnabled(True)
-            self.ui.Ch2_BF.setEnabled(True)
-            self.ui.mass_spectrum.setEnabled(True)
-            self.ui.electron_image.setEnabled(True)
+            self.ui.Ch1_FF.setEnabled(True), self.ui.Ch2_FF.setEnabled(True), self.ui.Ch2_BF.setEnabled(True)
+            self.ui.mass_spectrum.setEnabled(True), self.ui.electron_image.setEnabled(True)
 
             # Clearing the plots
-            self.ui.Ch1_FF.canvas.ax.clear()
-            self.ui.Ch2_FF.canvas.ax.clear()
-            self.ui.Ch2_BF.canvas.ax.clear()
-            self.ui.mass_spectrum.canvas.ax.clear()
-            self.ui.electron_image.canvas.ax.clear()
-
-            self.ui.Ch1_FF.canvas.fig.texts.clear()
-            self.ui.Ch2_FF.canvas.fig.texts.clear()
-            self.ui.Ch2_BF.canvas.fig.texts.clear()
+            self.ui.Ch1_FF.canvas.ax.clear(), self.ui.Ch1_FF.canvas.fig.texts.clear()
+            self.ui.Ch2_FF.canvas.ax.clear(), self.ui.Ch2_FF.canvas.fig.texts.clear()
+            self.ui.Ch2_BF.canvas.ax.clear(), self.ui.Ch2_BF.canvas.fig.texts.clear()
+            self.ui.mass_spectrum.canvas.ax.clear(), self.ui.electron_image.canvas.ax.clear()
 
             # Labeling the axes
-            self.ui.Ch1_FF.canvas.ax.set_xlabel('Retention time (min)')
-            self.ui.Ch1_FF.canvas.ax.set_ylabel('Intensity')
-            self.ui.Ch2_FF.canvas.ax.set_xlabel('Retention time (min)')
-            self.ui.Ch2_FF.canvas.ax.set_ylabel('Intensity')
-            self.ui.Ch2_BF.canvas.ax.set_xlabel('Retention time (min)')
-            self.ui.Ch2_BF.canvas.ax.set_ylabel('Intensity')
+            self.ui.Ch1_FF.canvas.ax.set_xlabel('Retention time (min)'), self.ui.Ch1_FF.canvas.ax.set_ylabel('Intensity')
+            self.ui.Ch2_FF.canvas.ax.set_xlabel('Retention time (min)'), self.ui.Ch2_FF.canvas.ax.set_ylabel('Intensity')
+            self.ui.Ch2_BF.canvas.ax.set_xlabel('Retention time (min)'), self.ui.Ch2_BF.canvas.ax.set_ylabel('Intensity')
+
+            # Enabling the grid
+            self.ui.Ch1_FF.canvas.ax.grid(True, 'both'), self.ui.Ch2_FF.canvas.ax.grid(True, 'both'), self.ui.Ch2_BF.canvas.ax.grid(True, 'both')
 
             # Showing the titles of the plots
             self.ui.Ch1_FF.canvas.ax.set_title('Ch1 (FF)')
@@ -455,18 +421,14 @@ class Controller:
 
                     # Channel 1 FF
                     if channel == 1 and detector == 1:
-                        self.ui.Ch1_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0],
-                                                      [0, max(self.Ch1_FF) * 0.1], 'k', linestyle='dotted')
-                        self.ui.Ch1_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0],
-                                                      [0, max(self.Ch1_FF) * 0.1], 'r', linestyle='dotted')
+                        self.ui.Ch1_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0], [0, max(self.Ch1_FF) * 0.1], 'k', linestyle='dotted')
+                        self.ui.Ch1_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0], [0, max(self.Ch1_FF) * 0.1], 'r', linestyle='dotted')
 
                     # Channel 2 FF
                     elif channel == 2 and detector == 1:
                         if float(self.compound_data[self.compound_names[i]][5]) > 0:
-                            self.ui.Ch2_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0],
-                                                          [0, max(self.Ch2_FF) * 0.1], 'k', linestyle='dotted')
-                            self.ui.Ch2_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0],
-                                                          [0, max(self.Ch2_FF) * 0.1], 'r', linestyle='dotted')
+                            self.ui.Ch2_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][0][0], [0, max(self.Ch2_FF) * 0.1], 'k', linestyle='dotted')
+                            self.ui.Ch2_FF.canvas.ax.plot(self.brackets[self.compound_names[i]][1][0], [0, max(self.Ch2_FF) * 0.1], 'r', linestyle='dotted')
 
                     # Channel 2 BF
                     elif channel == 2 and detector == 2:
@@ -478,30 +440,19 @@ class Controller:
 
             if draw:
                 # Showing the plots
-                self.ui.Ch1_FF.canvas.draw()
-                self.ui.Ch2_FF.canvas.draw()
-                self.ui.Ch2_BF.canvas.draw()
-                self.ui.mass_spectrum.canvas.draw()
-                self.ui.electron_image.canvas.draw()
+                self.ui.Ch1_FF.canvas.draw(), self.ui.Ch2_FF.canvas.draw(), self.ui.Ch2_BF.canvas.draw()
+                self.ui.mass_spectrum.canvas.draw(), self.ui.electron_image.canvas.draw()
 
         else:
-            self.ui.Ch1_FF.setEnabled(False)
-            self.ui.Ch2_FF.setEnabled(False)
-            self.ui.Ch2_BF.setEnabled(False)
-            self.ui.mass_spectrum.setEnabled(False)
-            self.ui.electron_image.setEnabled(False)
+            self.ui.Ch1_FF.setEnabled(False), self.ui.Ch2_FF.setEnabled(False), self.ui.Ch2_BF.setEnabled(False)
+            self.ui.mass_spectrum.setEnabled(False), self.ui.electron_image.setEnabled(False)
 
             # Clearing plots and redrawing them
-            self.ui.Ch1_FF.canvas.ax.clear()
-            self.ui.Ch1_FF.canvas.draw()
-            self.ui.Ch2_FF.canvas.ax.clear()
-            self.ui.Ch2_FF.canvas.draw()
-            self.ui.Ch2_BF.canvas.ax.clear()
-            self.ui.Ch2_BF.canvas.draw()
-            self.ui.mass_spectrum.canvas.ax.clear()
-            self.ui.mass_spectrum.canvas.draw()
-            self.ui.electron_image.canvas.ax.clear()
-            self.ui.electron_image.canvas.draw()
+            self.ui.Ch1_FF.canvas.ax.clear(), self.ui.Ch1_FF.canvas.draw()
+            self.ui.Ch2_FF.canvas.ax.clear(), self.ui.Ch2_FF.canvas.draw()
+            self.ui.Ch2_BF.canvas.ax.clear(), self.ui.Ch2_BF.canvas.draw()
+            self.ui.mass_spectrum.canvas.ax.clear(), self.ui.mass_spectrum.canvas.draw()
+            self.ui.electron_image.canvas.ax.clear(), self.ui.electron_image.canvas.draw()
 
     # When the chromatogram is double-clicked, the event below will execute
     def plot_click(self, event):
@@ -529,11 +480,9 @@ class Controller:
                         self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.Ch2_BF_x1, self.Ch2_BF_x2), max(self.Ch2_BF_x1, self.Ch2_BF_x2)])
                         self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.Ch2_BF_y1, self.Ch2_BF_y2), max(self.Ch2_BF_y1, self.Ch2_BF_y2)])
 
-                    self.ui.Ch1_FF.canvas.draw()
-                    self.ui.Ch2_FF.canvas.draw()
-                    self.ui.Ch2_BF.canvas.draw()
-                    self.ui.mass_spectrum.canvas.ax.clear()
-                    self.ui.electron_image.canvas.ax.clear()
+                    # Drawing the plots
+                    self.ui.Ch1_FF.canvas.draw(), self.ui.Ch2_FF.canvas.draw(), self.ui.Ch2_BF.canvas.draw()
+                    self.ui.mass_spectrum.canvas.ax.clear(), self.ui.electron_image.canvas.ax.clear()
 
                     # Selecting the TOF file based on which location of the plot has been clicked
                     with h5py.File('Data/scan_example.h5', 'r') as f:
@@ -565,6 +514,7 @@ class Controller:
                         self.ui.mass_spectrum.canvas.ax.set(xlim=(np.min(mz), 0.5 * np.max(mz)), xlabel='m/z', ylabel='Counts')
                         self.ui.mass_spectrum.canvas.ax.legend(loc='best')
                         self.ui.mass_spectrum.canvas.ax.set_title('Mass spectrum')
+                        self.ui.mass_spectrum.canvas.ax.grid(True, 'both')
                         self.ui.mass_spectrum.canvas.draw()
 
                     # Selecting the electron image based on which location of the plot has been clicked
@@ -639,31 +589,25 @@ class Controller:
             self.ui.line_box.setChecked(False)
             self.ui.zoom_box.setChecked(True)
 
-    # Reset the zoom in of the chromatograms
+    # Reset the zoom in of the visible chromatograms
     def reset_chromatograms(self):
         if self.ui.Ch1_FF_tab.isVisible():
-            self.Ch1_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch1_FF_x2 = max(self.time) + max(self.time) * 0.05
-            self.Ch1_FF_y1 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05
-            self.Ch1_FF_y2 = max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
+            self.Ch1_FF_x1, self.Ch1_FF_x2 = min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05
+            self.Ch1_FF_y1, self.Ch1_FF_y2 = min(self.Ch1_FF) - max(self.Ch1_FF) * 0.05, max(self.Ch1_FF) + max(self.Ch1_FF) * 0.05
             self.ui.Ch1_FF.canvas.ax.set_xlim([self.Ch1_FF_x1, self.Ch1_FF_x2])
             self.ui.Ch1_FF.canvas.ax.set_ylim([self.Ch1_FF_y1, self.Ch1_FF_y2])
             self.ui.Ch1_FF.canvas.draw()
 
         elif self.ui.Ch2_FF_tab.isVisible():
-            self.Ch2_FF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch2_FF_x2 = max(self.time) + max(self.time) * 0.05
-            self.Ch2_FF_y1 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05
-            self.Ch2_FF_y2 = max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
+            self.Ch2_FF_x1, self.Ch2_FF_x2 = min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05
+            self.Ch2_FF_y1, self.Ch2_FF_y2 = min(self.Ch2_FF) - max(self.Ch2_FF) * 0.05, max(self.Ch2_FF) + max(self.Ch2_FF) * 0.05
             self.ui.Ch2_FF.canvas.ax.set_xlim([self.Ch2_FF_x1, self.Ch2_FF_x2])
             self.ui.Ch2_FF.canvas.ax.set_ylim([self.Ch2_FF_y1, self.Ch2_FF_y2])
             self.ui.Ch2_FF.canvas.draw()
 
         elif self.ui.Ch2_BF_tab.isVisible():
-            self.Ch2_BF_x1 = min(self.time) - max(self.time) * 0.05
-            self.Ch2_BF_x2 = max(self.time) + max(self.time) * 0.05
-            self.Ch2_BF_y1 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05
-            self.Ch2_BF_y2 = max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
+            self.Ch2_BF_x1, self.Ch2_BF_x2 = min(self.time) - max(self.time) * 0.05, max(self.time) + max(self.time) * 0.05
+            self.Ch2_BF_y1, self.Ch2_BF_y2 = min(self.Ch2_BF) - max(self.Ch2_BF) * 0.05, max(self.Ch2_BF) + max(self.Ch2_BF) * 0.05
             self.ui.Ch2_BF.canvas.ax.set_xlim([self.Ch2_BF_x1, self.Ch2_BF_x2])
             self.ui.Ch2_BF.canvas.ax.set_ylim([self.Ch2_BF_y1, self.Ch2_BF_y2])
             self.ui.Ch2_BF.canvas.draw()
@@ -680,24 +624,20 @@ class Controller:
             if channel == 1 and detector == 1:
                 self.ui.tabWidget.setCurrentIndex(0)
                 self.ui.Ch1_FF.canvas.ax.plot([x, x], [min(self.Ch1_FF), max(self.Ch1_FF)], 'grey', linestyle='dotted')
-                self.ui.Ch1_FF.canvas.fig.text(x, max(self.Ch1_FF), self.compound_names[index], transform=self.ui.Ch1_FF.
-                                               canvas.ax.transData, color='red')
+                self.ui.Ch1_FF.canvas.fig.text(x, max(self.Ch1_FF), self.compound_names[index], transform=self.ui.Ch1_FF.canvas.ax.transData, color='red')
+                self.ui.Ch1_FF.canvas.draw()
 
             elif channel == 2 and detector == 1:
                 self.ui.tabWidget.setCurrentIndex(1)
                 self.ui.Ch2_FF.canvas.ax.plot([x, x], [min(self.Ch2_FF), max(self.Ch2_FF)], 'grey', linestyle='dotted')
-                self.ui.Ch2_FF.canvas.fig.text(x, max(self.Ch2_FF), self.compound_names[index], transform=self.ui.
-                                               Ch2_FF.canvas.ax.transData, color='red')
+                self.ui.Ch2_FF.canvas.fig.text(x, max(self.Ch2_FF), self.compound_names[index], transform=self.ui.Ch2_FF.canvas.ax.transData, color='red')
+                self.ui.Ch2_FF.canvas.draw()
 
             elif channel == 2 and detector == 2:
                 self.ui.tabWidget.setCurrentIndex(2)
                 self.ui.Ch2_BF.canvas.ax.plot([x, x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'grey', linestyle='dotted')
-                self.ui.Ch2_BF.canvas.fig.text(x, max(self.Ch2_BF), self.compound_names[index], transform=self.ui.Ch2_BF.canvas.ax.transData,
-                                               color='red')
-
-        self.ui.Ch1_FF.canvas.draw()
-        self.ui.Ch2_FF.canvas.draw()
-        self.ui.Ch2_BF.canvas.draw()
+                self.ui.Ch2_BF.canvas.fig.text(x, max(self.Ch2_BF), self.compound_names[index], transform=self.ui.Ch2_BF.canvas.ax.transData, color='red')
+                self.ui.Ch2_BF.canvas.draw()
 
     # The function to open the micro GC window
     def open_micro_gc_window(self):
@@ -706,8 +646,7 @@ class Controller:
 
 # The hard workers, also known as the threads
 class Worker1(QObject):
-    finished1 = pyqtSignal()
-    progress1 = pyqtSignal(int)
+    finished1, progress1 = pyqtSignal(), pyqtSignal(int)
 
     def run(self):
         while check:

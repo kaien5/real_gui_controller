@@ -581,7 +581,7 @@
       <x>300</x>
       <y>10</y>
       <width>1491</width>
-      <height>401</height>
+      <height>461</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -687,9 +687,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>820</x>
+        <x>990</x>
         <y>0</y>
-        <width>771</width>
+        <width>601</width>
         <height>581</height>
        </rect>
       </property>
@@ -702,7 +702,7 @@
        <rect>
         <x>-10</x>
         <y>0</y>
-        <width>831</width>
+        <width>1001</width>
         <height>581</height>
        </rect>
       </property>

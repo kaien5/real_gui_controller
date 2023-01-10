@@ -20,7 +20,7 @@ class WarningWindow:
         self.warning_window.setFixedHeight(80)
 
         window_width = self.warning_window.width()
-        self.ui_warning.ok_button.setGeometry(QtCore.QRect(window_width / 2 - 23, 50, 75, 23))
+        self.ui_warning.ok_button.setGeometry(QtCore.QRect(round(window_width / 2 - 23), 50, 75, 23))
 
         self.warning_window.show()
 

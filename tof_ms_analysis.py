@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy import optimize
-from jcamp import JCAMP_reader
+from jcamp import jcamp_readfile
 
 
 def reduce_res(array, factor):
@@ -27,7 +27,7 @@ def read_jdx(filename):
     Takes a filename.
     Returns the mz and amplitude values.
     """
-    data = JCAMP_reader(filename)
+    data = jcamp_readfile(filename)
     return data["x"], data["y"]
 
 
