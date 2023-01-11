@@ -18,3 +18,7 @@ class ApplicationController:
 
     def start(self):
         self.runner2 = main_gui_controller.Controller()
+
+
+if __name__ == '__main__':
+    ApplicationController()

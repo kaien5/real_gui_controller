@@ -10,8 +10,8 @@ def load(host=None, port=None):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.connect((host, port))
-        except Exception as e:
-            print("Cannot connect to the server:", e)
+        except:
+            pass
 
         # Message to receive latest measurement timestamp
         message = "R{TLA}\r\n".encode('utf-8')

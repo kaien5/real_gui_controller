@@ -17,5 +17,5 @@ class ElectronImageController:
             electron_images = f[electron_list][()]
             self.ui_EC.electron_image.canvas.ax.imshow(electron_images[picture_nr])
             self.ui_EC.electron_image.canvas.ax.axis('off')
-            self.ui_EC.electron_image.canvas.ax.set_title('Electron image')
+            self.ui_EC.electron_image.canvas.ax.set_title(f'Electron image at {ix} min')
             self.ui_EC.electron_image.canvas.draw()

@@ -12,3 +12,6 @@ standard_microGC_settings = {"Column temperature": "0", "Column carrier pressure
                              "Method name": "", "Heated sample line temp": "0", "Injection time": "0", "Analysis time": "0",
                              "Back-flush time": "0", "Cycle time": "0", "# of analysis per sequence": "0", "Rate": ["0.0", "10.0", "5.0"],
                              "Final temp": ["20.0", "180.0", "250.0"], "Hold time": ["0.0", "30.0", "0.0"]}
+
+column_names = ['Concentration [mol%]', 'Retention time [sec]', 'Peak area [mV×sec]', 'Peak height [mV]', 'Peak width [sec]',
+                'Integration start [sec]', 'Integration end [sec]', 'Channel number [Ch]', 'Detector']

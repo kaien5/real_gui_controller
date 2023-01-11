@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_electron_image_window(object):
     def setupUi(self, electron_image_window):
         electron_image_window.setObjectName("electron_image_window")
-        electron_image_window.resize(1142, 887)
+        electron_image_window.resize(1150, 890)
         self.electron_image = MplWidget(electron_image_window)
         self.electron_image.setEnabled(False)
         self.electron_image.setGeometry(QtCore.QRect(0, 0, 1151, 891))

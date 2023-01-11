@@ -1,3 +1,4 @@
+import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -55,3 +56,26 @@ def mz_calibration(histo, bins, masses, plot=True, p0=[1e-6, 0]):
         ax.set(xlabel='m/z', ylabel='Counts', xlim=[np.min(mz_axis), np.max(mz_axis)])
         ax.text(0.8, 0.9, f'a = {popt[0]:.3E}\nb = {popt[1]:.3E}', transform=ax.transAxes)
     return mz_axis
+
+
+def tof_select(loc, ix):
+    with h5py.File(loc, 'r') as f:
+        tof_list = list(f.keys())[0]
+
+        # Creating a list for the files in TOF
+        x = []
+        for _ in f[tof_list]:
+            x.append(_)
+
+        tof_nr = f[tof_list][x[abs(round(ix))]]
+        tof_spectrum = np.squeeze(tof_nr['TOF0'])
+        lr_spec = reduce_res(tof_spectrum, 30)
+        mz = mz_calibration(lr_spec, bins=[10235, 11087, 15182], masses=[69, 81, 152], plot=False)
+
+        ampl = lr_spec / np.max(lr_spec)
+        nist_data = []
+        mz_jdx, ampl_jdx = read_jdx('Data/nist_data.jdx')
+        ampl_jdx = ampl_jdx / np.max(ampl_jdx)
+        nist_data.append((mz_jdx, ampl_jdx))
+
+        return mz, ampl, nist_data

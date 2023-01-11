@@ -2,14 +2,13 @@ import socket
 import h5py
 import struct
 import numpy as np
+import values as v
 import file_browser
 import dynamiq_import
-import labviewcommunication
 import tof_ms_analysis as tof
 
 from time import sleep
 from PyQt5 import QtWidgets
-
 from main_gui import Ui_MainWindow
 from pymodbus.constants import Endian
 from pymodbus.client.sync import ModbusTcpClient
@@ -17,6 +16,7 @@ from microGC_controller import MicroGcController
 from pymodbus.payload import BinaryPayloadDecoder
 from warning_window_controller import WarningWindow
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from labview_communication import ascii_message, pack_payload
 from electron_image_controller import ElectronImageController
 
 
@@ -25,7 +25,7 @@ check = True
 
 class Controller:
     def __init__(self, load=False, data=None):
-        # Don't ask me why, but PyCharm wants this...
+        self.ix = None
         self.x1 = None
         self.x2 = None
         self.y1 = None
@@ -64,8 +64,8 @@ class Controller:
         self.ui.microGC_settings_button.clicked.connect(self.open_micro_gc_window)
         self.ui.disconnect_button_labview.clicked.connect(self.disconnect_labview)
         self.ui.send_button_labview.clicked.connect(self.send_message_labview)
-        self.ui.sequence_number.valueChanged.connect(self.sequence_selection)
         self.ui.connect_button_micro_GC.clicked.connect(self.connect_micro_GC)
+        self.ui.sequence_number.valueChanged.connect(self.sequence_selection)
         self.ui.connect_button_labview.clicked.connect(self.connect_labview)
         self.ui.reset_chromatogram.clicked.connect(self.reset_chromatograms)
         self.ui.chromatogram_table.clicked.connect(self.table_click)
@@ -115,8 +115,8 @@ class Controller:
             self.labview_client.sendall('START'.encode('utf-8'))
             self.labview_client.close()
 
-            self.ui.connect_button_labview.setEnabled(False)
             self.ui.disconnect_button_labview.setEnabled(True)
+            self.ui.connect_button_labview.setEnabled(False)
             self.ui.send_button_labview.setEnabled(True)
 
         except Exception as e:
@@ -129,7 +129,7 @@ class Controller:
             self.labview_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.labview_client.connect(('localhost', 6340))
 
-            # Sending message 'start'
+            # Sending message 'stop'
             self.labview_client.sendall('STOP'.encode('utf-8'))
             self.labview_client.close()
 
@@ -142,25 +142,23 @@ class Controller:
 
     # Send a message to the LabView script when connected
     def send_message_labview(self):
-        self.labview_client_message = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.labview_client_message.connect(('localhost', 6340))
+        try:
+            self.labview_client_message = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.labview_client_message.connect(('localhost', 6340))
 
-        indicator = self.ui.indicator_line.text()
-        command = self.ui.command_line.text()
-        payload = self.ui.payload_double.value()
-
-        if len(indicator) < 32 and len(command) < 32:
-            indicator_message = labviewcommunication.ascii_message(indicator)
-            command_message = labviewcommunication.ascii_message(command)
-            payload_message = labviewcommunication.pack_payload(payload)
-
+            indicator_message = ascii_message(self.ui.indicator_line.text())
+            command_message = ascii_message(self.ui.command_line.text())
+            payload_message = pack_payload(self.ui.payload_double.value())
             message = indicator_message + command_message + payload_message
+
             self.labview_client_message.sendall(message)
+            self.labview_client_message.close()
 
-        self.labview_client_message.close()
+            if self.ui.command_line.text() == 'STOP':
+                self.disconnect_labview()
 
-        if command == 'STOP':
-            self.disconnect_labview()
+        except Exception as e:
+            self.warning_window = WarningWindow(text=e)
 
     # The function to start the data acquisition
     def start(self):
@@ -198,13 +196,17 @@ class Controller:
     # The function to stop data acquisition
     def stop(self):
         global check
-        self.client.write_register(0x9D0A, 1)
-        self.client.close()
-        self.ui.connect_button_micro_GC.setEnabled(True)
-        self.ui.start_button.setEnabled(True)
-        self.ui.stop_button.setEnabled(False)
-        check = False
-        self.ui.microGC_status.setText('Run cancelled')
+        try:
+            self.client.write_register(0x9D0A, 1)
+            self.client.close()
+            self.ui.connect_button_micro_GC.setEnabled(True)
+            self.ui.start_button.setEnabled(True)
+            self.ui.stop_button.setEnabled(False)
+            check = False
+            self.ui.microGC_status.setText('Run cancelled')
+
+        except Exception as e:
+            self.warning_window = WarningWindow(text=e)
 
     # The function to open a file
     def open_file(self):
@@ -242,7 +244,7 @@ class Controller:
             self.ui.load_button.setEnabled(True)
 
         except Exception as e:
-            self.ui.microGC_status.setText('No connection possible')
+            self.ui.microGC_status.setText('Unable to connect')
             self.warning_window = WarningWindow(text=e)
 
     # This function is to check whether the MicroGC is busy
@@ -286,7 +288,12 @@ class Controller:
 
         # Connect to the IP written in the text line
         microGC_ip = self.ui.ip_address_microGC.text()
-        self.filename = dynamiq_import.load(host=microGC_ip, port=7197)
+
+        try:
+            self.filename = dynamiq_import.load(host=microGC_ip, port=7197)
+
+        except Exception as e:
+            self.warning_window = WarningWindow(text=e)
 
         # Importing the method name
         register = self.client.read_input_registers(32000, 10)
@@ -322,14 +329,11 @@ class Controller:
         for index, key in enumerate(self.compound_data):
             self.compound_names.append(key)
 
-        column_names = ['Concentration [mol%]', 'Retention time [sec]', 'Peak area [mV×sec]', 'Peak height [mV]', 'Peak width [sec]',
-                        'Integration start [sec]', 'Integration end [sec]', 'Channel number [Ch]', 'Detector']
-
         # The horizontal headers
-        for i in range(len(column_names)):
-            if self.ui.chromatogram_table.columnCount() < len(column_names):
+        for i in range(len(v.column_names)):
+            if self.ui.chromatogram_table.columnCount() < len(v.column_names):
                 self.ui.chromatogram_table.insertColumn(i)
-                self.ui.chromatogram_table.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(column_names[i]))
+                self.ui.chromatogram_table.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(v.column_names[i]))
 
         # The vertical headers
         for i in range(number_of_compounds):
@@ -339,7 +343,7 @@ class Controller:
 
         # The table contents
         for i in range(number_of_compounds):
-            for _ in range(len(column_names)):
+            for _ in range(len(v.column_names)):
                 if _ == 8:
                     if int(self.compound_data[self.compound_names[i]][_]) == 1:
                         self.ui.chromatogram_table.setItem(i, _, QtWidgets.QTableWidgetItem('FF'))
@@ -348,6 +352,9 @@ class Controller:
 
                 else:
                     self.ui.chromatogram_table.setItem(i, _, QtWidgets.QTableWidgetItem(self.compound_data[self.compound_names[i]][_]))
+
+                # Centering the horizontal text alignment
+                self.ui.chromatogram_table.item(i, _).setTextAlignment(0x0004)
 
         # Resizing the columns and rows to their contents
         self.ui.chromatogram_table.resizeColumnsToContents()
@@ -473,24 +480,27 @@ class Controller:
                     # Enabling the mass_spectrum and electron_image plots
                     self.ui.mass_spectrum.setEnabled(True), self.ui.electron_image.setEnabled(True)
 
-                    ix = round(float(event.xdata), 2)  # Location of the plot click
-                    index = np.where(self.time == ix)[0][0]  # Index location on where the line_x should appear
-                    line_x = self.time[index]
+                    # Location of the plot click and creating the position for the line
+                    ix = round(float(event.xdata), 2)
+                    line_x = self.time[np.where(self.time == ix)[0][0]]
 
+                    # Refreshing the plots by plotting only the data
                     self.plots(draw=False)
+
+                    # Plotting the line and time marker
                     self.ui.Ch1_FF.canvas.ax.plot([line_x, line_x], [min(self.Ch1_FF), max(self.Ch1_FF)], 'y')
                     self.ui.Ch2_FF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_FF), max(self.Ch2_FF)], 'y')
                     self.ui.Ch2_BF.canvas.ax.plot([line_x, line_x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'y')
+                    self.ui.Ch1_FF.canvas.fig.text(ix, max(self.Ch1_FF), str(f'{ix} min'), transform=self.ui.Ch1_FF.canvas.ax.transData)
+                    self.ui.Ch2_FF.canvas.fig.text(ix, max(self.Ch2_FF), str(f'{ix} min'), transform=self.ui.Ch2_FF.canvas.ax.transData)
+                    self.ui.Ch2_BF.canvas.fig.text(ix, max(self.Ch2_BF), str(f'{ix} min'), transform=self.ui.Ch2_BF.canvas.ax.transData)
 
-                    if self.ui.Ch1_FF_tab.isVisible():
+                    # Setting the limits for the scales of the plots
+                    if self.x1 != self.x2 or self.y1 != self.y2:
                         self.ui.Ch1_FF.canvas.ax.set_xlim([min(self.Ch1_FF_x1, self.Ch1_FF_x2), max(self.Ch1_FF_x1, self.Ch1_FF_x2)])
                         self.ui.Ch1_FF.canvas.ax.set_ylim([min(self.Ch1_FF_y1, self.Ch1_FF_y2), max(self.Ch1_FF_y1, self.Ch1_FF_y2)])
-
-                    elif self.ui.Ch2_FF.isVisible():
                         self.ui.Ch2_FF.canvas.ax.set_xlim([min(self.Ch2_FF_x1, self.Ch2_FF_x2), max(self.Ch2_FF_x1, self.Ch2_FF_x2)])
                         self.ui.Ch2_FF.canvas.ax.set_ylim([min(self.Ch2_FF_y1, self.Ch2_FF_y2), max(self.Ch2_FF_y1, self.Ch2_FF_y2)])
-
-                    elif self.ui.Ch2_BF.isVisible():
                         self.ui.Ch2_BF.canvas.ax.set_xlim([min(self.Ch2_BF_x1, self.Ch2_BF_x2), max(self.Ch2_BF_x1, self.Ch2_BF_x2)])
                         self.ui.Ch2_BF.canvas.ax.set_ylim([min(self.Ch2_BF_y1, self.Ch2_BF_y2), max(self.Ch2_BF_y1, self.Ch2_BF_y2)])
 
@@ -498,38 +508,21 @@ class Controller:
                     self.ui.Ch1_FF.canvas.draw(), self.ui.Ch2_FF.canvas.draw(), self.ui.Ch2_BF.canvas.draw()
                     self.ui.mass_spectrum.canvas.ax.clear(), self.ui.electron_image.canvas.ax.clear()
 
-                    # Selecting the TOF file based on which location of the plot has been clicked
-                    with h5py.File('Data/scan_example.h5', 'r') as f:
-                        tof_list = list(f.keys())[0]
+                    # Comparing mass spectrum with nist database and doing a conversion from time to m/z
+                    mz, ampl, nist_data = tof.tof_select('Data/scan_example.h5', ix)
 
-                        # Creating a list for the files in TOF
-                        x = []
-                        for _ in f[tof_list]:
-                            x.append(_)
+                    # The comparison below needs more data files, it has only 1 at this moment
+                    for i in range(len(nist_data)):
+                        self.ui.mass_spectrum.canvas.ax.bar(nist_data[i][0], -nist_data[i][1], label='NIST database', color='r')
 
-                        tof_nr = f[tof_list][x[abs(round(ix))]]
-                        tof_spectrum = np.squeeze(tof_nr['TOF0'])
-                        lr_spec = tof.reduce_res(tof_spectrum, 30)
-                        mz = tof.mz_calibration(lr_spec, bins=[10235, 11087, 15182], masses=[69, 81, 152], plot=False)
+                    self.ui.mass_spectrum.canvas.ax.plot(mz, ampl, "k-", label='Experiment')
 
-                        ampl = lr_spec / np.max(lr_spec)
-                        nist_data = []
-                        mz_jdx, ampl_jdx = tof.read_jdx('Data/nist_data.jdx')
-                        ampl_jdx = ampl_jdx / np.max(ampl_jdx)
-                        nist_data.append((mz_jdx, ampl_jdx))
-
-                        # The comparison below needs more data files, it has only 1 at this moment
-                        for i in range(len(nist_data)):
-                            self.ui.mass_spectrum.canvas.ax.bar(nist_data[i][0], -nist_data[i][1], label='NIST database', color='r')
-
-                        self.ui.mass_spectrum.canvas.ax.plot(mz, ampl, "k-", label='Experiment')
-
-                        # The * 0.5 below is a temporary correction
-                        self.ui.mass_spectrum.canvas.ax.set(xlim=(np.min(mz), 0.5 * np.max(mz)), xlabel='m/z', ylabel='Counts')
-                        self.ui.mass_spectrum.canvas.ax.legend(loc='best')
-                        self.ui.mass_spectrum.canvas.ax.set_title('Mass spectrum')
-                        self.ui.mass_spectrum.canvas.ax.grid(True, 'both')
-                        self.ui.mass_spectrum.canvas.draw()
+                    # The * 0.5 below is a temporary correction
+                    self.ui.mass_spectrum.canvas.ax.set(xlim=(np.min(mz), 0.5 * np.max(mz)), xlabel='m/z', ylabel='Counts')
+                    self.ui.mass_spectrum.canvas.ax.legend(loc='best')
+                    self.ui.mass_spectrum.canvas.ax.set_title(f'Mass spectrum at {ix} min')
+                    self.ui.mass_spectrum.canvas.ax.grid(True, 'both')
+                    self.ui.mass_spectrum.canvas.draw()
 
                     # Selecting the electron image based on which location of the plot has been clicked
                     with h5py.File('Data/example.h5', 'r') as f:
@@ -538,7 +531,7 @@ class Controller:
                         electron_images = f[electron_list][()]
                         self.ui.electron_image.canvas.ax.imshow(electron_images[picture_nr])
                         self.ui.electron_image.canvas.ax.axis('off')
-                        self.ui.electron_image.canvas.ax.set_title('Electron image')
+                        self.ui.electron_image.canvas.ax.set_title(f'Electron image at {ix} min')
                         self.ui.electron_image.canvas.draw()
                         self.ix = ix
 
@@ -654,6 +647,7 @@ class Controller:
                 self.ui.Ch2_BF.canvas.fig.text(x, max(self.Ch2_BF), self.compound_names[index], transform=self.ui.Ch2_BF.canvas.ax.transData, color='red')
                 self.ui.Ch2_BF.canvas.draw()
 
+    # The function that creates a separate window in which the electron image is visible
     def electron_image_click(self, event):
         if event.dblclick:
             self.ui_EC = ElectronImageController(self.time, self.ix)
