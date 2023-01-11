@@ -9,6 +9,7 @@ import tof_ms_analysis as tof
 
 from time import sleep
 from PyQt5 import QtWidgets
+
 from main_gui import Ui_MainWindow
 from pymodbus.constants import Endian
 from pymodbus.client.sync import ModbusTcpClient
@@ -16,6 +17,7 @@ from microGC_controller import MicroGcController
 from pymodbus.payload import BinaryPayloadDecoder
 from warning_window_controller import WarningWindow
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from electron_image_controller import ElectronImageController
 
 
 check = True
@@ -29,6 +31,7 @@ class Controller:
         self.y1 = None
         self.y2 = None
         self.wait = None
+        self.ui_EC = None
         self.client = None
         self.loaded = False
         self.worker1 = None
@@ -78,6 +81,7 @@ class Controller:
         self.ui.Ch1_FF.canvas.mpl_connect('button_press_event', self.plot_click), self.ui.Ch1_FF.canvas.mpl_connect('button_release_event', self.plot_click)
         self.ui.Ch2_FF.canvas.mpl_connect('button_press_event', self.plot_click), self.ui.Ch2_FF.canvas.mpl_connect('button_release_event', self.plot_click)
         self.ui.Ch2_BF.canvas.mpl_connect('button_press_event', self.plot_click), self.ui.Ch2_BF.canvas.mpl_connect('button_release_event', self.plot_click)
+        self.ui.electron_image.canvas.mpl_connect('button_press_event', self.electron_image_click)
 
         # Disabling the plots at start up
         self.ui.Ch1_FF.setEnabled(False)
@@ -275,8 +279,10 @@ class Controller:
         # Communicating to the plot function
         self.loaded = True
 
-        # Enabling the plot enable button
+        # Enabling the plots and the plot enable button
         self.ui.enable_plots.setEnabled(True)
+        self.ui.mass_spectrum.setEnabled(False)
+        self.ui.electron_image.setEnabled(False)
 
         # Connect to the IP written in the text line
         microGC_ip = self.ui.ip_address_microGC.text()
@@ -385,7 +391,6 @@ class Controller:
     def plots(self, draw=True):
         if self.ui.enable_plots.checkState():
             self.ui.Ch1_FF.setEnabled(True), self.ui.Ch2_FF.setEnabled(True), self.ui.Ch2_BF.setEnabled(True)
-            self.ui.mass_spectrum.setEnabled(True), self.ui.electron_image.setEnabled(True)
 
             # Clearing the plots
             self.ui.Ch1_FF.canvas.ax.clear(), self.ui.Ch1_FF.canvas.fig.texts.clear()
@@ -465,6 +470,9 @@ class Controller:
         if self.ui.line_box.isChecked():
             if event.dblclick:
                 try:
+                    # Enabling the mass_spectrum and electron_image plots
+                    self.ui.mass_spectrum.setEnabled(True), self.ui.electron_image.setEnabled(True)
+
                     ix = round(float(event.xdata), 2)  # Location of the plot click
                     index = np.where(self.time == ix)[0][0]  # Index location on where the line_x should appear
                     line_x = self.time[index]
@@ -532,6 +540,7 @@ class Controller:
                         self.ui.electron_image.canvas.ax.axis('off')
                         self.ui.electron_image.canvas.ax.set_title('Electron image')
                         self.ui.electron_image.canvas.draw()
+                        self.ix = ix
 
                 except Exception as e:
                     self.warning_window = WarningWindow(text=e)
@@ -644,6 +653,10 @@ class Controller:
                 self.ui.Ch2_BF.canvas.ax.plot([x, x], [min(self.Ch2_BF), max(self.Ch2_BF)], 'grey', linestyle='dotted')
                 self.ui.Ch2_BF.canvas.fig.text(x, max(self.Ch2_BF), self.compound_names[index], transform=self.ui.Ch2_BF.canvas.ax.transData, color='red')
                 self.ui.Ch2_BF.canvas.draw()
+
+    def electron_image_click(self, event):
+        if event.dblclick:
+            self.ui_EC = ElectronImageController(self.time, self.ix)
 
     # The function to open the micro GC window
     def open_micro_gc_window(self):
